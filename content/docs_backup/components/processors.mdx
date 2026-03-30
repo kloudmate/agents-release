@@ -1,0 +1,20 @@
+---
+title: Processors
+description: OpenTelemetry Collector processors bundled with the KloudMate Agent.
+---
+
+Processors are components that transform, filter, and enrich telemetry data as it flows through the OpenTelemetry Collector pipeline.
+
+## Bundled Processors
+
+| Processor | Description |
+| :--- | :--- |
+| **Batch Processor** | Batches telemetry data to reduce the number of outgoing connections |
+| **Memory Limiter Processor** | Prevents out-of-memory situations by limiting memory usage |
+| **Attributes Processor** | Modifies attributes of spans, metrics, and logs |
+| **Resource Processor** | Modifies resource attributes on telemetry data |
+| **Filter Processor** | Filters telemetry data based on configurable rules |
+| **K8s Attributes Processor** | Enriches telemetry with Kubernetes metadata (pod, namespace, node) |
+| **Transform Processor** | Applies transformations using the OpenTelemetry Transformation Language (OTTL) |
+
+For detailed configuration of each processor, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#processors).

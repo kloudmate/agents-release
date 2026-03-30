@@ -1,0 +1,46 @@
+---
+title: Troubleshooting
+description: Common issues and how to resolve them when using the KloudMate Agent.
+---
+
+## Reporting Issues
+
+Before creating an issue, please:
+
+- Check existing [issues](https://github.com/kloudmate/km-agent/issues)
+- Provide detailed reproduction steps
+- Include environment information (K8s version, VM host info, OS, etc.)
+
+## Getting Help
+
+-  **Email**: support@kloudmate.com
+-  **[Issues](https://github.com/kloudmate/km-agent/issues)** — Bug reports and feature requests
+-  **[Documentation](https://docs.kloudmate.com)**
+
+## Community Resources
+
+-  **[Dashboard templates](https://templates.kloudmate.com)**
+-  **[Blog Posts](https://blog.kloudmate.com)**
+-  **[Slack Community](https://kloudmate.slack.com)**
+
+## Common Issues
+
+### Agent Not Starting
+
+1. Verify the `KM_API_KEY` is correctly set.
+2. Ensure the `KM_COLLECTOR_ENDPOINT` is reachable from the host.
+3. Check system logs for error messages.
+
+### Kubernetes Pods Not Scheduling
+
+If agent DaemonSet pods are not scheduling on tainted nodes, ensure you have configured the appropriate tolerations during Helm installation. See the [Installation guide](/docs/installation) for details.
+
+### eBPF Features Not Working
+
+- Ensure your Linux kernel version is at least 5.8 (recommended). Some features work on 4.18+.
+- Verify the agent has `CAP_SYS_ADMIN` and `CAP_BPF` capabilities.
+- In Kubernetes, confirm RBAC permissions for Node, Pod, Service, and ReplicaSet viewers.
+
+### Configuration Changes Not Taking Effect
+
+Manually updating ConfigMaps is not recommended. Use the **KloudMate Agent Config Editor** to ensure configurations are synchronized and persisted correctly.

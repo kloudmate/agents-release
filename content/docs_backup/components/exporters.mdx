@@ -1,0 +1,19 @@
+---
+title: Exporters
+description: OpenTelemetry Collector exporters bundled with the KloudMate Agent.
+---
+
+Exporters are components that send telemetry data to observability backends and storage systems.
+
+## Bundled Exporters
+
+| Exporter | Description |
+| :--- | :--- |
+| **OTLP Exporter** | Exports telemetry data via the OpenTelemetry Protocol (gRPC and HTTP) |
+| **OTLP HTTP Exporter** | Exports telemetry data via OTLP over HTTP |
+| **Debug Exporter** | Outputs telemetry data to the console for debugging |
+| **Prometheus Exporter** | Exposes metrics in Prometheus format for scraping |
+
+The KloudMate Agent is configured to export telemetry data to `https://otel.kloudmate.com:4318` by default.
+
+For detailed configuration of each exporter, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#exporters).
