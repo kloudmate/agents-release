@@ -1,0 +1,46 @@
+# Zero Code Instrumentation
+
+
+
+Zero Code Instrumentation allows you to instrument your applications without modifying source code. This approach attaches APM agents to your application runtimes that auto-instrument standard libraries and frameworks.
+
+How It Works [#how-it-works]
+
+OpenTelemetry auto-instrumentation agents hook into your application's runtime to automatically capture:
+
+* HTTP request/response traces
+* Database query spans
+* External service calls
+* Message queue operations
+
+When to Use [#when-to-use]
+
+* When you want comprehensive tracing without modifying application code
+* When your application uses well-supported frameworks and libraries
+* When you can perform application restarts to inject the instrumentation agent
+
+Supported Languages [#supported-languages]
+
+| Language    | Auto-Instrumentation Agent                 |
+| :---------- | :----------------------------------------- |
+| **Java**    | OpenTelemetry Java Agent                   |
+| **Python**  | OpenTelemetry Python Auto-Instrumentation  |
+| **Node.js** | OpenTelemetry Node.js Auto-Instrumentation |
+| **.NET**    | OpenTelemetry .NET Auto-Instrumentation    |
+
+Kubernetes Auto-Instrumentation [#kubernetes-auto-instrumentation]
+
+In Kubernetes environments, the KloudMate Agent can automatically inject instrumentation agents into your application pods using the OpenTelemetry Operator's `Instrumentation` CRD. This requires:
+
+1. The `kloudmate-crd` to be installed in the cluster
+2. The `featuresEnabled.apm` flag set to `true` during Helm installation
+3. Annotating target pods or namespaces for instrumentation
+
+Comparison with eBPF [#comparison-with-ebpf]
+
+Unlike [Zero Downtime Observability](/docs/apm/zero-downtime-observability) (eBPF-based), zero-code instrumentation:
+
+* Requires application restarts to inject the agent
+* Provides richer library-specific instrumentation detail
+* Is language-dependent (requires a compatible runtime agent)
+* Can capture custom attributes from supported frameworks

@@ -1,0 +1,39 @@
+# Manual Instrumentation
+
+
+
+Manual instrumentation gives you full control over your observability data by using OpenTelemetry SDKs directly in your application code. This approach is ideal when you need custom business logic attributes, fine-grained span management, or specialized metrics.
+
+When to Use [#when-to-use]
+
+* When you need custom business-logic attributes on spans and metrics
+* When you want precise control over span boundaries and naming
+* When auto-instrumentation doesn't cover your specific libraries or frameworks
+* When you need to add custom metrics beyond what auto-instrumentation provides
+
+Supported SDKs [#supported-sdks]
+
+The KloudMate Agent works with any OpenTelemetry SDK. Configure your SDK to export telemetry data via OTLP to the agent's endpoint:
+
+| Language    | SDK                                  |
+| :---------- | :----------------------------------- |
+| **Go**      | `go.opentelemetry.io/otel`           |
+| **Java**    | `io.opentelemetry:opentelemetry-sdk` |
+| **Python**  | `opentelemetry-sdk`                  |
+| **Node.js** | `@opentelemetry/sdk-node`            |
+| **.NET**    | `OpenTelemetry.Sdk`                  |
+| **Rust**    | `opentelemetry` crate                |
+| **Ruby**    | `opentelemetry-sdk` gem              |
+
+Configuration [#configuration]
+
+Point your OpenTelemetry SDK exporter to the KloudMate Agent's OTLP endpoint:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+OTEL_SERVICE_NAME="your-service-name"
+```
+
+Combining with eBPF [#combining-with-ebpf]
+
+**💡 Recommended approach:** Start with [Zero Downtime Observability](/docs/apm/zero-downtime-observability) (eBPF) for instant, broad coverage, then strategically enrich with manual OpenTelemetry SDK instrumentation where you need custom business logic attributes.

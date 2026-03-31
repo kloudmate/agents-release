@@ -1,0 +1,22 @@
+# Receivers
+
+
+
+Receivers are components that collect telemetry data from various sources and feed it into the OpenTelemetry Collector pipeline.
+
+Bundled Receivers [#bundled-receivers]
+
+The KloudMate Agent bundles the following receivers:
+
+| Receiver                        | Description                                                            |
+| :------------------------------ | :--------------------------------------------------------------------- |
+| **OTLP Receiver**               | Receives telemetry data via the OpenTelemetry Protocol (gRPC and HTTP) |
+| **Host Metrics Receiver**       | Collects host-level metrics (CPU, memory, disk, network)               |
+| **Filelog Receiver**            | Tails and parses log files from the filesystem                         |
+| **Kubernetes Cluster Receiver** | Collects cluster-level metrics and events from the Kubernetes API      |
+| **Kubelet Stats Receiver**      | Collects pod and container metrics from the Kubelet API                |
+| **Kubernetes Objects Receiver** | Watches Kubernetes resource objects for monitoring                     |
+| **Prometheus Receiver**         | Scrapes Prometheus-format metrics endpoints                            |
+| **eBPF Receiver**               | Kernel-level observability for application and network metrics         |
+
+For detailed configuration of each receiver, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#receivers).

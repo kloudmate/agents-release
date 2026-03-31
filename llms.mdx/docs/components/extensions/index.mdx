@@ -1,0 +1,16 @@
+# Extensions
+
+
+
+Extensions provide additional capabilities to the OpenTelemetry Collector that are not part of the core telemetry pipeline (receiving, processing, exporting).
+
+Bundled Extensions [#bundled-extensions]
+
+| Extension                       | Description                                             |
+| :------------------------------ | :------------------------------------------------------ |
+| **Health Check Extension**      | Exposes an HTTP endpoint for agent health monitoring    |
+| **PProf Extension**             | Exposes Go pprof endpoints for performance profiling    |
+| **zPages Extension**            | Provides in-process diagnostics for debugging pipelines |
+| **Bearer Token Auth Extension** | Provides bearer token authentication for exporters      |
+
+For detailed configuration of each extension, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#extensions).

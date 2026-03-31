@@ -1,0 +1,1994 @@
+# Architecture
+
+
+
+Overview [#overview]
+
+The KloudMate Agent is installed as a service on the host system, a Docker container, or a DaemonSet on Kubernetes. It is set up during the installation process. The agent is responsible for managing the lifecycle of the Collector. The Agent is not an implementation of the Collector itself — instead, it runs and manages the lifecycle of the existing OTel Collector.
+
+It is also primarily responsible for watching remote configuration (via a REST endpoint) and passing the configuration to the Collector when changes are detected. It has other functionalities such as synthetic monitoring that can be used to monitor the agent's status, and various logs for monitoring purposes.
+
+Each agent is uniquely identifiable, so it can be used to build dashboards for users to monitor the agents and configure them using a web interface.
+
+What the Docker Agent Monitors [#what-the-docker-agent-monitors]
+
+Once installed, the Docker Agent collects:
+
+* Container metrics: CPU, memory, network, and disk usage for each running container
+* Container lifecycle events: start, stop, restart
+* Host metrics: CPU, memory, disk, and network usage of the Docker host
+* Container and host logs: stdout/stderr from containers and system logs from host
+* Alerts: Configure thresholds for containers or the host to notify on performance issues
+* Dashboards: Prebuilt views for container-level and host-level performance
+  This allows you to monitor containers and host together, troubleshoot performance issues, and correlate logs with metrics.
+
+<Callout type="info">
+  The Docker agent requires `docker.sock` to be mounted to the agent container.
+</Callout>
+
+Kubernetes Agent Architecture [#kubernetes-agent-architecture]
+
+The Kubernetes agent runs as a Deployment and DaemonSet and includes:
+
+* **Node Monitoring**: CPU, memory, disk, and network metrics
+* **Pod Monitoring**: Container-level metrics and logs
+* **Cluster Events**: Kubernetes events and resource monitoring
+* **Service Discovery**: Automatic service endpoint detection
+
+Supported Environments [#supported-environments]
+
+| Environment    | Status      | Details                                        |
+| :------------- | :---------- | :--------------------------------------------- |
+| **Linux**      | ✅ Supported | Debian/Ubuntu, RHEL/CentOS — x86\_64 and ARM64 |
+| **Docker**     | ✅ Supported | Host metrics and log collection                |
+| **Kubernetes** | ✅ Supported | Via DaemonSet and Deployment                   |
+| **Windows**    | ✅ Supported | Windows Server 2016+                           |
+
+Future Support [#future-support]
+
+In future releases the agent can also be installed in:
+
+* Mac
+* OCI (Oracle Cloud Infrastructure)
+
+
+# Configuration
+
+
+
+Remote Configuration [#remote-configuration]
+
+The KloudMate Agent supports remote configuration through a web-based YAML editor. This eliminates the need for SSH access to your target machines and ensures your configurations are properly synchronized and persisted across your infrastructure.
+
+The agent watches for remote configuration changes (via a REST endpoint) and passes the updated configuration to the Collector when changes are detected.
+
+Recommended Approach [#recommended-approach]
+
+Manually updating ConfigMaps for the DaemonSet or Deployment agents is **not recommended**, as these configurations may be overwritten by updates sent from KloudMate APIs. Use the **KloudMate Agent Config Editor** instead — a web-based YAML editor for centralized configuration management.
+
+Feature Flags [#feature-flags]
+
+You can control which telemetry signals the agent collects using feature flags:
+
+| Flag                      | Default | Description                                |
+| :------------------------ | :------ | :----------------------------------------- |
+| `featuresEnabled.metrics` | `true`  | Enables metrics collection                 |
+| `featuresEnabled.traces`  | `true`  | Enables trace collection                   |
+| `featuresEnabled.apm`     | `false` | Enables application performance monitoring |
+| `featuresEnabled.logs`    | `false` | Enables log collection                     |
+
+eBPF Configuration [#ebpf-configuration]
+
+The eBPF Receiver is enabled through the agent's `config.yaml`. Below is a standard configuration:
+
+```yaml
+metrics:
+  features:
+    - application          # HTTP, gRPC, SQL operation metrics (RED metrics)
+    - application_span     # Trace spans for transactions
+    - network              # L3/L4 Network flow metrics
+
+discovery:
+  services:
+    - name: all-services
+      namespace: default
+      open_ports: '80, 443, 8080, 8443, 5432, 3306, 6379, 9092, 27017'
+
+network:
+  enable: true
+  source: tc
+  direction: both
+
+attributes:
+  kubernetes:
+    enable: true
+```
+
+Database Monitoring Configuration [#database-monitoring-configuration]
+
+Enable heuristic SQL detection and tune caches for high-load environments:
+
+```yaml
+ebpf:
+  heuristic_sql_detect: true
+  mysql_prepared_statements_cache_size: 1024
+  postgres_prepared_statements_cache_size: 1024
+```
+
+
+# KloudMate Agents
+
+
+
+**KM-Agent is an [OpenTelemetry Collector distribution](https://opentelemetry.io/docs/concepts/distributions/)** that extends the upstream OpenTelemetry Collector with additional capabilities for simplified deployment, remote configuration management, automated instrumentation, and **eBPF-powered kernel-level observability**. We've bundled a curated set of components optimized for observability in Kubernetes, Linux, Docker, Windows environments, and even on Edge.
+
+Key Problems Solved [#key-problems-solved]
+
+* **Complex Configuration**: Eliminates the steep learning curve of OpenTelemetry Collector configuration
+* **Manual Installation**: Provides automated installation scripts for multiple environments
+* **Configuration Management**: Enables remote configuration through a web interface without SSH access
+* **Blind Spots in Observability**: Using eBPF get instant, zero-code visibility across all services — no SDK integration, no code changes, no restarts
+* **Database Visibility**: Built-in Database Activity Monitoring (DAM) captures SQL operations, latencies, and throughput at the kernel level
+
+Features [#features]
+
+* **Automated Installation**: One-command deployment across Linux, Docker, and Kubernetes
+* **Remote Configuration**: Configure agents through a web interface without your target machine access
+* **Lifecycle Management**: Comprehensive management of OpenTelemetry Collector
+* **Synthetic Monitoring**: Built-in health checks and monitoring capabilities
+* **Multi-Platform Support**: Native support for various deployment environments (including ARM64)
+* **Real-time Dashboards**: Unique agent identification for centralized monitoring
+* **eBPF-Powered Observability**: Kernel-level, zero-code instrumentation for instant application and network visibility
+* **Database Activity Monitoring (DAM)**: Automatic profiling of MySQL, PostgreSQL. Even messaging systems like Redis, Kafka etc.
+* **Zero Downtime Instrumentation**: Observe all services without code changes or application restarts
+
+Supported Environments [#supported-environments]
+
+* **Linux** (Debian/Ubuntu, RHEL/CentOS) — x86\_64 and ARM64 (aarch64)
+* **Docker** (Host metrics and log collection)
+* **Kubernetes** (via DaemonSet and Deployment)
+* **Windows** (Windows Server 2016+)
+
+Supported OpenTelemetry Components [#supported-opentelemetry-components]
+
+The KloudMate Agent includes a set of OpenTelemetry Collector components including receivers, processors, exporters, and extensions. See the [Components](/docs/components) section for the complete list.
+
+Next Steps [#next-steps]
+
+<Cards>
+  <Card title="Architecture" description="Understand the agent's internal architecture and lifecycle management." href="/docs/architecture" />
+
+  <Card title="Installation" description="Get the agent running on Linux, Docker, Kubernetes, or Windows." href="/docs/installation" />
+
+  <Card title="Configuration" description="Learn how to configure the agent locally or via remote management." href="/docs/configuration" />
+
+  <Card title="APM" description="Application Performance Monitoring with eBPF, zero-code, and manual instrumentation." href="/docs/apm" />
+
+  <Card title="Databases" description="Monitor database queries, latencies, and throughput automatically." href="/docs/databases" />
+</Cards>
+
+
+# Troubleshooting
+
+
+
+Reporting Issues [#reporting-issues]
+
+Before creating an issue, please:
+
+* Check existing [issues](https://github.com/kloudmate/km-agent/issues)
+* Provide detailed reproduction steps
+* Include environment information (K8s version, VM host info, OS, etc.)
+
+Getting Help [#getting-help]
+
+* **Email**: [support@kloudmate.com](mailto:support@kloudmate.com)
+* **[Issues](https://github.com/kloudmate/km-agent/issues)** — Bug reports and feature requests
+* **[Documentation](https://docs.kloudmate.com)**
+
+Community Resources [#community-resources]
+
+* **[Dashboard templates](https://templates.kloudmate.com)**
+* **[Blog Posts](https://blog.kloudmate.com)**
+* **[Slack Community](https://kloudmate.slack.com)**
+
+Common Issues [#common-issues]
+
+Agent Not Starting [#agent-not-starting]
+
+1. Verify the `KM_API_KEY` is correctly set.
+2. Ensure the `KM_COLLECTOR_ENDPOINT` is reachable from the host.
+3. Check system logs for error messages.
+
+Kubernetes Pods Not Scheduling [#kubernetes-pods-not-scheduling]
+
+If agent DaemonSet pods are not scheduling on tainted nodes, ensure you have configured the appropriate tolerations during Helm installation. See the [Installation guide](/docs/installation) for details.
+
+eBPF Features Not Working [#ebpf-features-not-working]
+
+* Ensure your Linux kernel version is at least 5.8 (recommended). Some features work on 4.18+.
+* Verify the agent has `CAP_SYS_ADMIN` and `CAP_BPF` capabilities.
+* In Kubernetes, confirm RBAC permissions for Node, Pod, Service, and ReplicaSet viewers.
+
+Configuration Changes Not Taking Effect [#configuration-changes-not-taking-effect]
+
+Manually updating ConfigMaps is not recommended. Use the **KloudMate Agent Config Editor** to ensure configurations are synchronized and persisted correctly.
+
+
+# Overview
+
+
+
+Application Performance Monitoring (APM) lets you trace distributed transactions, monitor essential metrics like latency, errors, and throughput, and get to the root cause of issues faster.
+
+The KloudMate Agent has comprehensive support for APM. You can instrument your applications using one of three methods:
+
+<Cards>
+  <Card title="Zero Downtime Observability" description="Leverage kernel-level eBPF to automatically capture traces, DB queries, and RED metrics—with zero code changes and zero application restarts." href="/docs/apm/zero-downtime-observability" />
+
+  <Card title="Zero Code Instrumentation" description="Attach APM agents to your runtimes to auto-instrument standard libraries. Requires application restarts but no code changes." href="/docs/apm/zero-code-instrumentation" />
+
+  <Card title="Manual Instrumentation" description="Use OpenTelemetry SDKs directly in your application code for rich, highly-customized business tracing and metrics." href="/docs/apm/manual-instrumentation" />
+</Cards>
+
+
+# Manual Instrumentation
+
+
+
+Manual instrumentation gives you full control over your observability data by using OpenTelemetry SDKs directly in your application code. This approach is ideal when you need custom business logic attributes, fine-grained span management, or specialized metrics.
+
+When to Use [#when-to-use]
+
+* When you need custom business-logic attributes on spans and metrics
+* When you want precise control over span boundaries and naming
+* When auto-instrumentation doesn't cover your specific libraries or frameworks
+* When you need to add custom metrics beyond what auto-instrumentation provides
+
+Supported SDKs [#supported-sdks]
+
+The KloudMate Agent works with any OpenTelemetry SDK. Configure your SDK to export telemetry data via OTLP to the agent's endpoint:
+
+| Language    | SDK                                  |
+| :---------- | :----------------------------------- |
+| **Go**      | `go.opentelemetry.io/otel`           |
+| **Java**    | `io.opentelemetry:opentelemetry-sdk` |
+| **Python**  | `opentelemetry-sdk`                  |
+| **Node.js** | `@opentelemetry/sdk-node`            |
+| **.NET**    | `OpenTelemetry.Sdk`                  |
+| **Rust**    | `opentelemetry` crate                |
+| **Ruby**    | `opentelemetry-sdk` gem              |
+
+Configuration [#configuration]
+
+Point your OpenTelemetry SDK exporter to the KloudMate Agent's OTLP endpoint:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+OTEL_SERVICE_NAME="your-service-name"
+```
+
+Combining with eBPF [#combining-with-ebpf]
+
+**💡 Recommended approach:** Start with [Zero Downtime Observability](/docs/apm/zero-downtime-observability) (eBPF) for instant, broad coverage, then strategically enrich with manual OpenTelemetry SDK instrumentation where you need custom business logic attributes.
+
+
+# Zero Code Instrumentation
+
+
+
+Zero Code Instrumentation allows you to instrument your applications without modifying source code. This approach attaches APM agents to your application runtimes that auto-instrument standard libraries and frameworks.
+
+How It Works [#how-it-works]
+
+OpenTelemetry auto-instrumentation agents hook into your application's runtime to automatically capture:
+
+* HTTP request/response traces
+* Database query spans
+* External service calls
+* Message queue operations
+
+When to Use [#when-to-use]
+
+* When you want comprehensive tracing without modifying application code
+* When your application uses well-supported frameworks and libraries
+* When you can perform application restarts to inject the instrumentation agent
+
+Supported Languages [#supported-languages]
+
+| Language    | Auto-Instrumentation Agent                 |
+| :---------- | :----------------------------------------- |
+| **Java**    | OpenTelemetry Java Agent                   |
+| **Python**  | OpenTelemetry Python Auto-Instrumentation  |
+| **Node.js** | OpenTelemetry Node.js Auto-Instrumentation |
+| **.NET**    | OpenTelemetry .NET Auto-Instrumentation    |
+
+Kubernetes Auto-Instrumentation [#kubernetes-auto-instrumentation]
+
+In Kubernetes environments, the KloudMate Agent can automatically inject instrumentation agents into your application pods using the OpenTelemetry Operator's `Instrumentation` CRD. This requires:
+
+1. The `kloudmate-crd` to be installed in the cluster
+2. The `featuresEnabled.apm` flag set to `true` during Helm installation
+3. Annotating target pods or namespaces for instrumentation
+
+Comparison with eBPF [#comparison-with-ebpf]
+
+Unlike [Zero Downtime Observability](/docs/apm/zero-downtime-observability) (eBPF-based), zero-code instrumentation:
+
+* Requires application restarts to inject the agent
+* Provides richer library-specific instrumentation detail
+* Is language-dependent (requires a compatible runtime agent)
+* Can capture custom attributes from supported frameworks
+
+
+# Zero-Downtime O11y (eBPF)
+
+
+
+Prelude [#prelude]
+
+Mission-critical environments managed by forward-thinking Site Reliability Engineering (SRE) teams, Security Operations Centers (SOCs), and tier-1 financial institutions face a fundamental paradox: You need deep observability to maintain stability, but deploying traditional observability agents compromises that stability.
+
+The KloudMate's eBPF Approach solves this paradox. It provides a drop-in APM observability component that lives in the Linux kernel—observing the behavior of the entire system dynamically without altering user-level applications.
+
+By deploying the KloudMate Agent with the eBPF receiver enabled, you unlock instant, out-of-the-box observability for your entire infrastructure—without requiring code changes, manual configurations, or application restarts.
+
+**A Paradigm Shift**
+
+If your application can run on Linux, it can be fully observed by KloudMate. Enjoy frictionless operations and complete network visibility with absolute Zero Downtime.
+
+Out-of-the-Box Value [#out-of-the-box-value]
+
+The eBPF receiver leverages the Extended Berkeley Packet Filter to extract vast amounts of actionable metrics securely. From day one, your SOC and SRE teams receive:
+
+1. Universal RED Metrics [#1-universal-red-metrics]
+
+Automatically generates and exports comprehensive Request Rate, Error Rate, and Duration (Latency) metrics across all observed services.
+
+* **Protocol Agnostic**: Automatically supports HTTP/HTTP2, gRPC, MySQL, PostgreSQL, Redis, MongoDB, Kafka, and Elasticsearch.
+* **Operational Context**: Every metric includes critical operational markers such as exact HTTP status codes, gRPC status flags, and Database query behaviors.
+
+2. Auto-Distributed Tracing [#2-auto-distributed-tracing]
+
+* Intelligently links incoming network requests to outgoing dependency calls instantaneously (e.g., an HTTP handler querying a database instance).
+* Generates strictly compliant OpenTelemetry trace spans, producing a seamless Service Graph representing your living architecture.
+
+3. Dynamic Service Inventory & Metadata [#3-dynamic-service-inventory--metadata]
+
+* Automatically identifies the process language (`km.apm.runtime.language`) of your running applications without touching the binary.
+* Enriches traces with dense Host IDs, Process IDs, and Cloud Provider metadata tags.
+* If running under Kubernetes, it correlates metrics securely with K8s attributes (`namespace`, `pod_name`, `deployment`, `node_name`) dynamically.
+
+4. Granular Network Observability [#4-granular-network-observability]
+
+* Captures L3/L4 network flow metrics transparently—including full bytes transferred, TCP retransmits, state alterations, and packet drops between isolated services.
+* Empowers security teams (SOC) with definitive visibility into service-to-service communication dependencies and anomalous traffic mapping.
+
+The KloudMate APM Edge vs. Traditional Telemetry [#the-kloudmate-apm-edge-vs-traditional-telemetry]
+
+While traditional OpenTelemetry heavily relies on language-specific SDKs (manual instrumentation) or bloated runtime dependencies (auto-instrumentation) attached to every service, the KloudMate eBPF Receiver is profoundly superior in high-risk environments.
+
+| Feature                  | KM eBPF Receiver                                           | Traditional OpenTelemetry                                     |
+| :----------------------- | :--------------------------------------------------------- | :------------------------------------------------------------ |
+| **Code Changes**         | **None.** Deploy the agent to the node.                    | Requires SDK dependencies or attaching agents.                |
+| **Application Restarts** | **No restarts required.**                                  | Requires rolling restarts to inject instrumentation.          |
+| **Setup Complexity**     | **Low.** Single DaemonSet / VM process per host.           | **High.** Per-service configuration, library updates.         |
+| **Language Support**     | **Universal.** Go, Rust, C++, Python, Java, Node.js, Ruby. | Requires per-language SDKs; compiled languages are difficult. |
+| **Performance Overhead** | **Extremely low.** Runs in kernel space.                   | Higher, especially with rich auto-instrumentation.            |
+| **Missing Services**     | Impossible — the kernel sees every packet.                 | Un-instrumented services remain blind spots.                  |
+
+Deploying APM Strategically [#deploying-apm-strategically]
+
+**Start with eBPF:** The eBPF Receiver serves as the ultimate foundational layer for enterprise observability. For massive deployments like tier-1 Banks or multi-tenant SaaS platforms, deploy the KM-Agent to grab immediate Service Graphs, rigorous network insights, and universal APM metrics across every language and stack you run.
+
+**Enrich Where Necessary:** Once eBPF has illuminated the vast majority of your distributed architecture, strategically deploy [Manual Instrumentation](/docs/apm/manual-instrumentation) SDKs into the specific handful of applications requiring bespoke business logic mapping (such as tracing a specific User ID or capturing unique transaction states).
+
+The KloudMate Agent seamlessly merges eBPF kernel intelligence with your applications telemetry data giving your SRE teams a flawless, unified view of reality.
+
+Configuration & Setup [#configuration--setup]
+
+The KloudMate eBPF Agent is a minimal-configuration observability agent designed to run as a DaemonSet within your Kubernetes cluster or as a standalone process on a Linux host. This section details how to configure the agent perfectly for full-stack visibility.
+
+Prerequisites [#prerequisites]
+
+* A Linux host with kernel version {'>='} 5.8 (highly recommended for full feature support, though some features work on 4.18+).
+* Root privileges or `CAP_SYS_ADMIN` and `CAP_BPF` capabilities for the agent process.
+* If running in Kubernetes, the Agent requires specific RBAC permissions (Node, Pod, Service, ReplicaSet viewers) to enrich the metrics automatically.
+
+Basic Configuration [#basic-configuration]
+
+To enable the eBPF Agent's core features—Application RED Metrics, Network Observability, and OpenTelemetry Exporting—you can add following to your receiver's definition.
+
+Here is a standard configuration example that enables the most common telemetry features across the entire host/node automatically, pointing data to a local OTEL Collector or directly to the KloudMate backend.
+
+```yaml
+# ============================================================================
+# METRICS & OBSERVABILITY FEATURES
+# ============================================================================
+metrics:
+  features:
+    - application              # Exports standard RED (Request rate, Error rate, Duration) metrics for HTTP, gRPC, DB, and Messaging requests at the service level.
+    - application_host         # Exports RED metrics aggregated at the host/node level, providing a node-centric view of application performance.
+    - network                  # Exports granular L3/L4 network flow metrics (TCP/UDP bytes, drops, retransmits) between connection endpoints.
+    - application_process      # Exports RED metrics aggregated down to the specific Process ID (PID) instance level for deeper isolation.
+    - network_inter_zone       # Aggregates network flow metrics specifically based on traffic crossing defined geographic or logical zones (CIDRs).
+    - application_span         # Exports OpenTelemetry span-based metrics (Span metrics) derived directly from the generated trace spans.
+    - application_service_graph # Exports specifically formatted dependency metrics (service_graph_request_total, etc.) used to build visual topological service maps.
+
+# ============================================================================
+# TARGET DISCOVERY
+# ============================================================================
+discovery:
+  kubernetes:
+    enable: true
+  services:
+    # Monitor everything on the node automatically
+    - name: all-services
+      namespace: default, kube-system, my-app
+      open_ports: '80, 443, 8080, 8443, 5432, 3306, 6379, 9092, 27017'
+      # k8s_pod_name: '.*'    # Optional: specifically match all Kubernetes pods
+
+# ============================================================================
+# NETWORK OBSERVABILITY
+# ============================================================================
+network:
+  enable: true
+  source: tc
+  direction: both
+
+# ============================================================================
+# KUBERNETES ENRICHMENT
+# ============================================================================
+attributes:
+  kubernetes:
+    enable: true
+
+# ============================================================================
+# OPENTELEMETRY EXPORT SETTINGS
+# ============================================================================
+```
+
+Advanced Fine-Tuning [#advanced-fine-tuning]
+
+The agent allows very specific overrides, feature flags, and granular attribute filtering. You can tune caching sizes and limit what exact attributes are exported per signal via the `attributes.select` map.
+
+```yaml
+ebpf:
+  # Enable heuristic detection for internal DB protocols
+  heuristic_sql_detect: true
+  # Configure maximum DB operation caches (important for high load)
+  mysql_prepared_statements_cache_size: 1024
+  postgres_prepared_statements_cache_size: 1024
+
+attributes:
+  # Explicit filtering of the attributes appended to your telemetry.
+  # For example, only send specific K8s tags on standard HTTP traffic:
+  select:
+    http.server.request.duration:
+      include:
+        - http.request.method
+        - http.response.status_code
+        - url.path
+        - k8s.namespace
+        - k8s.pod.name
+        - service.name
+    db.client.operation.duration:
+      include:
+        - db.operation.name
+        - db.system.name
+        - server.address
+        - k8s.pod.name
+        - service.name
+```
+
+Running the Agent with eBPF in Kubernetes [#running-the-agent-with-ebpf-in-kubernetes]
+
+When installing via the official KloudMate Helm Chart (as outlined in the [Installation Guide](/docs/installation#kubernetes-installation)), the eBPF support is automatically configured with necessary volume mounts and permissions.
+
+You do not need to manually create DaemonSets or map volume mounts. Simply ensure that the `discovery` block in your `receivers::ebpfreceiver` section has `kubernetes.enable: true` and that the correct `namespace` lists are provided to begin monitoring traffic immediately.
+
+**Trace context propagation**
+
+You need to enable the `application_span` in the `metrics` section of the `receivers::ebpfreceiver` configuration. Also you must ensure that `network::source` is set to `socket_filter`.
+
+
+# Connectors
+
+
+
+Connectors join two pipelines together, acting as both an exporter in one pipeline and a receiver in another. They enable cross-signal processing and routing.
+
+Bundled Connectors [#bundled-connectors]
+
+| Connector                  | Description                                                                           |
+| :------------------------- | :------------------------------------------------------------------------------------ |
+| **Span Metrics Connector** | Generates metrics from trace spans (request counts, duration histograms, error rates) |
+| **Forward Connector**      | Routes telemetry data between pipelines without transformation                        |
+| **Count Connector**        | Generates count metrics from spans, logs, or data points                              |
+
+For detailed configuration of each connector, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#connectors).
+
+
+# Exporters
+
+
+
+Exporters are components that send telemetry data to observability backends and storage systems.
+
+Bundled Exporters [#bundled-exporters]
+
+| Exporter                | Description                                                           |
+| :---------------------- | :-------------------------------------------------------------------- |
+| **OTLP Exporter**       | Exports telemetry data via the OpenTelemetry Protocol (gRPC and HTTP) |
+| **OTLP HTTP Exporter**  | Exports telemetry data via OTLP over HTTP                             |
+| **Debug Exporter**      | Outputs telemetry data to the console for debugging                   |
+| **Prometheus Exporter** | Exposes metrics in Prometheus format for scraping                     |
+
+The KloudMate Agent is configured to export telemetry data to `https://otel.kloudmate.com:4318` by default.
+
+For detailed configuration of each exporter, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#exporters).
+
+
+# Extensions
+
+
+
+Extensions provide additional capabilities to the OpenTelemetry Collector that are not part of the core telemetry pipeline (receiving, processing, exporting).
+
+Bundled Extensions [#bundled-extensions]
+
+| Extension                       | Description                                             |
+| :------------------------------ | :------------------------------------------------------ |
+| **Health Check Extension**      | Exposes an HTTP endpoint for agent health monitoring    |
+| **PProf Extension**             | Exposes Go pprof endpoints for performance profiling    |
+| **zPages Extension**            | Provides in-process diagnostics for debugging pipelines |
+| **Bearer Token Auth Extension** | Provides bearer token authentication for exporters      |
+
+For detailed configuration of each extension, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#extensions).
+
+
+# Components Overview
+
+
+
+The KloudMate Agent includes a curated set of OpenTelemetry Collector components including receivers, processors, exporters, extensions, and connectors. These components are optimized for observability in Kubernetes, Linux, Docker, and Windows environments.
+
+Component Categories [#component-categories]
+
+<Cards>
+  <Card title="Receivers" description="Components that collect telemetry data from various sources." href="/docs/components/receivers" />
+
+  <Card title="Processors" description="Components that transform and enrich telemetry data in the pipeline." href="/docs/components/processors" />
+
+  <Card title="Exporters" description="Components that send telemetry data to observability backends." href="/docs/components/exporters" />
+
+  <Card title="Extensions" description="Components that provide additional capabilities like health checks and authentication." href="/docs/components/extensions" />
+
+  <Card title="Connectors" description="Components that connect pipelines together for cross-signal processing." href="/docs/components/connectors" />
+</Cards>
+
+
+# Processors
+
+
+
+Processors are components that transform, filter, and enrich telemetry data as it flows through the OpenTelemetry Collector pipeline.
+
+Bundled Processors [#bundled-processors]
+
+| Processor                    | Description                                                                    |
+| :--------------------------- | :----------------------------------------------------------------------------- |
+| **Batch Processor**          | Batches telemetry data to reduce the number of outgoing connections            |
+| **Memory Limiter Processor** | Prevents out-of-memory situations by limiting memory usage                     |
+| **Attributes Processor**     | Modifies attributes of spans, metrics, and logs                                |
+| **Resource Processor**       | Modifies resource attributes on telemetry data                                 |
+| **Filter Processor**         | Filters telemetry data based on configurable rules                             |
+| **K8s Attributes Processor** | Enriches telemetry with Kubernetes metadata (pod, namespace, node)             |
+| **Transform Processor**      | Applies transformations using the OpenTelemetry Transformation Language (OTTL) |
+
+For detailed configuration of each processor, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#processors).
+
+
+# Receivers
+
+
+
+Receivers are components that collect telemetry data from various sources and feed it into the OpenTelemetry Collector pipeline.
+
+Bundled Receivers [#bundled-receivers]
+
+The KloudMate Agent bundles the following receivers:
+
+| Receiver                        | Description                                                            |
+| :------------------------------ | :--------------------------------------------------------------------- |
+| **OTLP Receiver**               | Receives telemetry data via the OpenTelemetry Protocol (gRPC and HTTP) |
+| **Host Metrics Receiver**       | Collects host-level metrics (CPU, memory, disk, network)               |
+| **Filelog Receiver**            | Tails and parses log files from the filesystem                         |
+| **Kubernetes Cluster Receiver** | Collects cluster-level metrics and events from the Kubernetes API      |
+| **Kubelet Stats Receiver**      | Collects pod and container metrics from the Kubelet API                |
+| **Kubernetes Objects Receiver** | Watches Kubernetes resource objects for monitoring                     |
+| **Prometheus Receiver**         | Scrapes Prometheus-format metrics endpoints                            |
+| **eBPF Receiver**               | Kernel-level observability for application and network metrics         |
+
+For detailed configuration of each receiver, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#receivers).
+
+
+# Database Access Monitoring (DAM)
+
+
+
+The eBPF Receiver includes built-in **Database Activity Monitoring** that automatically profiles database traffic at the kernel level. No database-side agents or plugins needed.
+
+Supported Databases [#supported-databases]
+
+| Database       | Captured Metrics                                                             |
+| :------------- | :--------------------------------------------------------------------------- |
+| **MySQL**      | Query operations, latency (avg + P99), prepared statements, read/write ratio |
+| **PostgreSQL** | Query operations, latency (avg + P99), prepared statements, read/write ratio |
+
+Supported Messaging Systems [#supported-messaging-systems]
+
+| System            | Captured Metrics                        |
+| :---------------- | :-------------------------------------- |
+| **Redis**         | Command operations, latency, throughput |
+| **Kafka**         | Producer/Consumer metrics, throughput   |
+| **Elasticsearch** | Request operations, latency, throughput |
+
+Key DAM Capabilities [#key-dam-capabilities]
+
+* **Table-level hotspot detection** — identify your most queried and slowest tables
+* **Read vs. Write ratio analysis** — understand workload characteristics per table
+* **P99 latency tracking** — surface tail latency issues before they impact users
+* **Zero configuration** — automatically detected via eBPF kernel hooks; no database credentials required
+
+When to Use [#when-to-use]
+
+* When you need instant database visibility with **zero setup**
+* When you cannot or prefer not to create a monitoring user on the database
+* When running on Linux with kernel ≥ 5.8
+* When you want to monitor traffic across **all** supported databases and messaging systems from a single agent
+
+<Callout type="info">
+  For deeper query analytics including execution plans and schema discovery, see [Direct Database Monitoring](/docs/databases/sql-setup). For distributed trace context from your application SDKs, see [OpenTelemetry Database Monitoring](/docs/databases/otel).
+</Callout>
+
+Configuration [#configuration]
+
+Enable heuristic SQL detection and tune caches for high-load environments:
+
+```yaml
+ebpf:
+  heuristic_sql_detect: true
+  mysql_prepared_statements_cache_size: 1024
+  postgres_prepared_statements_cache_size: 1024
+```
+
+Prerequisites [#prerequisites]
+
+* Linux kernel ≥ 5.8 (recommended; some features work on 4.18+)
+* Root privileges or `CAP_SYS_ADMIN` + `CAP_BPF` capabilities
+* The eBPF Receiver must be enabled in the agent configuration (see [Configuration](/docs/configuration))
+
+
+# Databases Monitoring
+
+
+
+The KloudMate Agent provides three approaches to database monitoring — from zero-configuration kernel-level profiling to deep SQL-level query analytics — so you can choose the right level of visibility for your environment.
+
+<Callout title="Which approach should I use?" type="info">
+  **eBPF (DAM)** is the fastest way to get started — zero configuration, no database credentials needed. For deep query analytics with execution plans and schema discovery, use **Direct Database Monitoring**. **OpenTelemetry** is ideal when your application already uses OTel SDKs and you want database spans as part of your distributed traces.
+</Callout>
+
+Monitoring Approaches [#monitoring-approaches]
+
+<Cards>
+  <Card title="Database Access Monitoring (DAM)" description="eBPF-powered, zero-configuration database profiling at the kernel level. No database-side agents or plugins needed." href="/docs/databases/ebpf" />
+
+  <Card title="OpenTelemetry Database Monitoring" description="Use OpenTelemetry SDK instrumentation for rich database query tracing with custom attributes." href="/docs/databases/otel" />
+
+  <Card title="Direct Database Monitoring" description="SQL-based setup with a dedicated monitoring user for deep query metrics, execution plans, and schema discovery." href="/docs/databases/sql-setup" />
+</Cards>
+
+Supported Databases [#supported-databases]
+
+| Database          | eBPF (DAM) | OpenTelemetry | Direct (SQL Setup) |
+| :---------------- | :--------- | :------------ | :----------------- |
+| **MySQL**         | ✅          | ✅             | ✅                  |
+| **PostgreSQL**    | ✅          | ✅             | ✅                  |
+| **Redis**         | ✅          | ✅             | —                  |
+| **Kafka**         | ✅          | ✅             | —                  |
+| **Elasticsearch** | ✅          | ✅             | —                  |
+| **MongoDB**       | —          | ✅             | —                  |
+
+Comparison [#comparison]
+
+| Feature                              | eBPF (DAM)   | OpenTelemetry   | Direct (SQL Setup)         |
+| :----------------------------------- | :----------- | :-------------- | :------------------------- |
+| **Setup complexity**                 | None         | SDK integration | SQL scripts + agent config |
+| **Database credentials**             | Not required | Not required    | Required                   |
+| **Query text**                       | ✅            | ✅ (sanitized)   | ✅                          |
+| **Execution plans (EXPLAIN)**        | —            | —               | ✅                          |
+| **Wait event analysis**              | —            | —               | ✅                          |
+| **Schema discovery**                 | —            | —               | ✅                          |
+| **Distributed trace context**        | —            | ✅               | —                          |
+| **Custom span attributes**           | —            | ✅               | —                          |
+| **Works on managed DBs (RDS, etc.)** | ✅            | ✅               | ✅                          |
+| **Linux kernel requirement**         | ≥ 5.8        | None            | None                       |
+
+
+# OpenTelemetry Database Monitoring
+
+
+
+In addition to the eBPF-based [Database Access Monitoring (DAM)](/docs/databases/ebpf), you can use OpenTelemetry SDK instrumentation to capture detailed database query traces with custom attributes.
+
+How It Works [#how-it-works]
+
+OpenTelemetry auto-instrumentation agents and SDKs provide library-specific hooks that capture database operations as trace spans. These spans include:
+
+* SQL query text (sanitized)
+* Database system and name
+* Operation type (SELECT, INSERT, UPDATE, DELETE)
+* Duration and status
+* Connection details
+
+When to Use [#when-to-use]
+
+* When you need rich, library-specific database query details
+* When you want custom attributes on database spans
+* When your application already uses OpenTelemetry SDKs
+* When combined with [Manual Instrumentation](/docs/apm/manual-instrumentation) for business context
+
+Supported Database Libraries [#supported-database-libraries]
+
+| Language    | Libraries Auto-Instrumented               |
+| :---------- | :---------------------------------------- |
+| **Java**    | JDBC, Hibernate, Spring Data              |
+| **Python**  | SQLAlchemy, psycopg2, PyMySQL, Django ORM |
+| **Node.js** | pg, mysql2, mongoose, Prisma              |
+| **.NET**    | Entity Framework, Npgsql, MySqlConnector  |
+| **Go**      | database/sql, GORM, pgx                   |
+
+Configuration [#configuration]
+
+Configure your OpenTelemetry SDK to export to the KloudMate Agent OTLP endpoint:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+OTEL_SERVICE_NAME="your-service-name"
+```
+
+Database spans will automatically be captured when using supported auto-instrumentation libraries.
+
+<Callout type="info">
+  For zero-configuration kernel-level profiling, see [Database Access Monitoring (DAM)](/docs/databases/ebpf). For deep query analytics with execution plans and schema discovery, see [Direct Database Monitoring](/docs/databases/sql-setup).
+</Callout>
+
+
+# Direct Database Monitoring
+
+
+
+The KloudMate Agent can connect directly to your database using a dedicated monitoring user to collect deep query metrics, execution plans, and schema metadata. This approach provides the richest level of database insight — including per-query latency breakdowns, explain plans, and wait event analysis — across both self-hosted and managed database services.
+
+<Callout title="When to Use" type="info">
+  Use Direct Database Monitoring when you need deep query-level analytics including execution plans, query digest metrics, wait event analysis, and schema discovery. This is the most comprehensive monitoring approach and works on any environment — self-hosted, RDS, Aurora, Cloud SQL, Azure, or AlloyDB.
+</Callout>
+
+How It Works [#how-it-works]
+
+1. You create a dedicated `kloudmate` database user with minimal read-only permissions
+2. Helper procedures/functions (using `SECURITY DEFINER`) allow the agent to access query stats and run `EXPLAIN` without needing superuser privileges
+3. The KM Agent connects using this user and periodically collects query metrics, live queries, execution plans, and schema metadata
+
+MySQL Setup [#mysql-setup]
+
+1. Create Monitoring User [#1-create-monitoring-user]
+
+Connect as a user with admin privileges (for RDS/Aurora, use the master user):
+
+```sql
+CREATE USER IF NOT EXISTS 'kloudmate'@'%'
+  IDENTIFIED BY '<KLOUDMATE_PASSWORD>';
+
+-- Limit connections to prevent exhausting the pool
+ALTER USER 'kloudmate'@'%' WITH MAX_USER_CONNECTIONS 5;
+```
+
+2. Grant Base Permissions [#2-grant-base-permissions]
+
+```sql
+-- PROCESS: See all running threads and queries
+-- REPLICATION CLIENT: Check replication lag and binary log position
+-- SELECT on perf_schema: Read query digest stats, wait events, etc.
+
+GRANT REPLICATION CLIENT ON *.* TO 'kloudmate'@'%';
+GRANT PROCESS ON *.* TO 'kloudmate'@'%';
+GRANT SELECT ON performance_schema.* TO 'kloudmate'@'%';
+```
+
+3. Create Helper Procedures [#3-create-helper-procedures]
+
+Create a dedicated schema and the helper procedures the agent uses:
+
+```sql
+CREATE SCHEMA IF NOT EXISTS kloudmate;
+GRANT EXECUTE ON kloudmate.* TO 'kloudmate'@'%';
+```
+
+Enable Performance Schema Consumers [#enable-performance-schema-consumers]
+
+On RDS/Aurora/Cloud SQL you cannot permanently enable `performance_schema` consumers via config. This procedure lets the agent enable them at runtime:
+
+```sql
+DELIMITER $$
+CREATE PROCEDURE IF NOT EXISTS kloudmate.enable_events_statements_consumers()
+SQL SECURITY DEFINER
+BEGIN
+    UPDATE performance_schema.setup_consumers
+       SET enabled = 'YES'
+     WHERE name LIKE 'events_statements_%';
+
+    UPDATE performance_schema.setup_consumers
+       SET enabled = 'YES'
+     WHERE name = 'events_waits_current';
+END $$
+DELIMITER ;
+
+GRANT EXECUTE ON PROCEDURE kloudmate.enable_events_statements_consumers TO 'kloudmate'@'%';
+```
+
+Explain Statement [#explain-statement]
+
+Collects JSON execution plans for sampled queries:
+
+```sql
+DELIMITER $$
+CREATE PROCEDURE IF NOT EXISTS kloudmate.explain_statement(IN query TEXT)
+SQL SECURITY DEFINER
+BEGIN
+    SET @explain := CONCAT('EXPLAIN FORMAT=json ', query);
+    PREPARE stmt FROM @explain;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END $$
+DELIMITER ;
+
+GRANT EXECUTE ON PROCEDURE kloudmate.explain_statement TO 'kloudmate'@'%';
+```
+
+4. Enable Performance Schema [#4-enable-performance-schema]
+
+<Callout title="RDS / Aurora" type="warn">
+  Performance Schema must be enabled via the **Parameter Group** in the AWS Console or CLI — it cannot be set via SQL.
+
+  Set the following parameters and **reboot** the instance:
+
+  * `performance_schema = 1`
+  * `max_digest_length = 4096`
+  * `performance_schema_max_digest_length = 4096`
+  * `performance_schema_max_sql_text_length = 4096`
+</Callout>
+
+**Self-Hosted** — add to your `my.cnf` / `mysqld.cnf`:
+
+```ini
+[mysqld]
+performance_schema = ON
+performance-schema-consumer-events-statements-current = ON
+performance-schema-consumer-events-statements-history = ON
+performance-schema-consumer-events-statements-history-long = ON
+performance-schema-consumer-events-waits-current = ON
+max_digest_length = 4096
+performance_schema_max_digest_length = 4096
+performance_schema_max_sql_text_length = 4096
+```
+
+5. Optional: Schema Collection [#5-optional-schema-collection]
+
+To enable the KloudMate Schema Explorer, grant `SELECT` on the databases the agent should discover:
+
+```sql
+-- Option A: All databases
+GRANT SELECT ON *.* TO 'kloudmate'@'%';
+
+-- Option B: Specific databases only
+GRANT SELECT ON your_app_db.* TO 'kloudmate'@'%';
+```
+
+<Callout type="info">
+  The agent queries `information_schema` for metadata — it does **not** read your actual row data.
+</Callout>
+
+6. Finalize [#6-finalize]
+
+```sql
+FLUSH PRIVILEGES;
+```
+
+7. Verify Setup [#7-verify-setup]
+
+Run these as the `kloudmate` user:
+
+```sql
+-- Check performance_schema is enabled
+SELECT @@performance_schema;
+
+-- Check consumers are active
+SELECT name, enabled FROM performance_schema.setup_consumers
+ WHERE name LIKE 'events_statements_%' OR name = 'events_waits_current';
+
+-- Check query digests are being collected
+SELECT COUNT(*) FROM performance_schema.events_statements_summary_by_digest;
+
+-- Verify procedures exist
+SHOW PROCEDURE STATUS WHERE db = 'kloudmate';
+
+-- Test explain
+CALL kloudmate.explain_statement('SELECT 1');
+```
+
+MySQL Agent Configuration [#mysql-agent-configuration]
+
+```yaml
+receivers:
+  kloudmate_mysql:
+    endpoint: "<HOST>:3306"
+    username: "kloudmate"
+    password: "${KLOUDMATE_DB_PASSWORD}"
+    database: ""                           # empty = monitor all databases
+    collect_query_metrics: true
+    collect_query_samples: true
+    collect_explain_plans: true
+    collect_schema: true                   # requires SELECT grants (step 5)
+    collection_interval: 10s
+    query_samples_rate: 1                  # sample every Nth query
+    tls:
+      enabled: true                        # recommended for RDS
+      skip_verify: false
+```
+
+For RDS with IAM authentication:
+
+```yaml
+receivers:
+  kloudmate_mysql:
+    endpoint: "<RDS_ENDPOINT>:3306"
+    auth_type: "iam"
+    username: "kloudmate"
+    aws:
+      region: "ap-south-1"
+      instance_endpoint: "<RDS_ENDPOINT>"
+```
+
+***
+
+PostgreSQL Setup [#postgresql-setup]
+
+1. Create Monitoring User [#1-create-monitoring-user-1]
+
+Connect as a superuser (or `rds_superuser` on RDS/Aurora) to the `postgres` database:
+
+```sql
+CREATE USER kloudmate WITH PASSWORD '<KLOUDMATE_PASSWORD>';
+```
+
+2. Grant Base Permissions [#2-grant-base-permissions-1]
+
+```sql
+-- pg_monitor: Built-in role (PG 10+) granting read access to
+-- pg_stat_activity, pg_stat_replication, pg_stat_database, and more.
+GRANT pg_monitor TO kloudmate;
+```
+
+3. Enable pg_stat_statements [#3-enable-pg_stat_statements]
+
+`pg_stat_statements` is the primary data source for query metrics (latency, calls, rows):
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements SCHEMA public;
+```
+
+<Callout title="RDS / Aurora" type="warn">
+  Add `pg_stat_statements` to `shared_preload_libraries` in your RDS parameter group and **reboot** the instance.
+</Callout>
+
+**Self-Hosted** — add to `postgresql.conf`:
+
+```ini
+shared_preload_libraries = 'pg_stat_statements'
+pg_stat_statements.track = all
+pg_stat_statements.max = 10000
+track_activity_query_size = 4096
+```
+
+4. Create Helper Functions [#4-create-helper-functions]
+
+Create a dedicated schema and the `SECURITY DEFINER` wrapper functions:
+
+```sql
+CREATE SCHEMA IF NOT EXISTS kloudmate;
+GRANT USAGE ON SCHEMA kloudmate TO kloudmate;
+GRANT USAGE ON SCHEMA public TO kloudmate;
+```
+
+<Callout type="info">
+  The `SECURITY DEFINER` pattern means these functions execute with the privileges of the admin who created them, not the `kloudmate` user calling them. This is how the agent gains full visibility into query stats and activity on managed databases without requiring superuser access.
+</Callout>
+
+pg_stat_activity Wrapper [#pg_stat_activity-wrapper]
+
+Ensures full visibility into all sessions' query text (required on RDS where non-superusers have restricted access):
+
+```sql
+CREATE OR REPLACE FUNCTION kloudmate.pg_stat_activity()
+RETURNS SETOF pg_stat_activity
+AS $$
+    SELECT * FROM pg_catalog.pg_stat_activity;
+$$
+LANGUAGE sql
+SECURITY DEFINER;
+```
+
+pg_stat_statements Wrapper [#pg_stat_statements-wrapper]
+
+Ensures full visibility into all query statistics:
+
+```sql
+CREATE OR REPLACE FUNCTION kloudmate.pg_stat_statements()
+RETURNS SETOF pg_stat_statements
+AS $$
+    SELECT * FROM pg_stat_statements;
+$$
+LANGUAGE sql
+SECURITY DEFINER;
+```
+
+Explain Statement [#explain-statement-1]
+
+Collects JSON execution plans for sampled queries:
+
+```sql
+CREATE OR REPLACE FUNCTION kloudmate.explain_statement(
+    l_query TEXT,
+    OUT explain JSON
+)
+RETURNS SETOF JSON
+AS $$
+DECLARE
+    curs REFCURSOR;
+    plan JSON;
+BEGIN
+    OPEN curs FOR EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON) ', l_query);
+    LOOP
+        FETCH curs INTO plan;
+        EXIT WHEN NOT FOUND;
+        RETURN QUERY SELECT plan;
+    END LOOP;
+    CLOSE curs;
+    RETURN;
+END;
+$$
+LANGUAGE plpgsql
+SECURITY DEFINER;
+```
+
+5. Optional Functions [#5-optional-functions]
+
+Stats Reset [#stats-reset]
+
+Safe way to reset `pg_stat_statements` counters without direct superuser access:
+
+```sql
+CREATE OR REPLACE FUNCTION kloudmate.pg_stat_statements_reset()
+RETURNS VOID
+AS $$
+    SELECT pg_stat_statements_reset();
+$$
+LANGUAGE sql
+SECURITY DEFINER;
+```
+
+Replication Monitoring [#replication-monitoring]
+
+Only needed on the **primary / writer** instance for monitoring replication lag:
+
+```sql
+CREATE OR REPLACE FUNCTION kloudmate.pg_stat_replication()
+RETURNS SETOF pg_stat_replication
+AS $$
+    SELECT * FROM pg_catalog.pg_stat_replication;
+$$
+LANGUAGE sql
+SECURITY DEFINER;
+```
+
+6. Configure Parameters [#6-configure-parameters]
+
+<Callout title="RDS / Aurora Parameter Group" type="warn">
+  Set the following in the AWS Console or CLI and **reboot**:
+
+  * `shared_preload_libraries = 'pg_stat_statements'`
+  * `track_activity_query_size = 4096`
+  * `pg_stat_statements.track = all`
+  * `pg_stat_statements.max = 10000` (recommended)
+</Callout>
+
+**Self-Hosted** — add to `postgresql.conf`:
+
+```ini
+shared_preload_libraries = 'pg_stat_statements'
+pg_stat_statements.track = all
+pg_stat_statements.max = 10000
+track_activity_query_size = 4096
+track_io_timing = on                     # required for I/O metrics
+log_min_duration_statement = 1000        # log slow queries (ms)
+```
+
+7. Optional: auto_explain [#7-optional-auto_explain]
+
+For full `EXPLAIN ANALYZE` plans (actual execution times, not just estimates):
+
+```ini
+shared_preload_libraries = 'pg_stat_statements,auto_explain'
+auto_explain.log_min_duration = 1000
+auto_explain.log_analyze = true
+auto_explain.log_buffers = true
+auto_explain.log_timing = true
+auto_explain.log_triggers = true
+auto_explain.log_verbose = true
+auto_explain.log_format = json
+auto_explain.log_nested_statements = true
+auto_explain.sample_rate = 1             # 1 = all, 0.1 = 10% sample
+```
+
+<Callout type="warn">
+  `auto_explain` with `log_analyze=true` adds overhead because it executes the query plan. Use `sample_rate < 1` in production.
+</Callout>
+
+8. Repeat for Each Database [#8-repeat-for-each-database]
+
+<Callout type="info">
+  `pg_stat_statements` and the kloudmate functions must exist in **every** database the agent monitors. The agent connects to one database at a time.
+</Callout>
+
+For each additional database (e.g. `app_db`, `analytics_db`), connect and re-run the extension + function creation:
+
+```bash
+for db in $(psql -t -c "SELECT datname FROM pg_database WHERE datistemplate = false"); do
+  psql -d "$db" -f kloudmate_functions.sql
+done
+```
+
+9. Verify Setup [#9-verify-setup]
+
+Run as the `kloudmate` user:
+
+```sql
+-- Check pg_stat_statements is loaded
+SELECT count(*) FROM pg_stat_statements;
+
+-- Check functions exist
+SELECT routine_name FROM information_schema.routines
+ WHERE routine_schema = 'kloudmate';
+
+-- Test pg_stat_activity wrapper
+SELECT count(*) FROM kloudmate.pg_stat_activity();
+
+-- Test explain
+SELECT * FROM kloudmate.explain_statement('SELECT 1');
+
+-- Check track_activity_query_size
+SHOW track_activity_query_size;
+
+-- Check track_io_timing
+SHOW track_io_timing;
+```
+
+PostgreSQL Agent Configuration [#postgresql-agent-configuration]
+
+```yaml
+receivers:
+  kloudmate_postgresql:
+    endpoint: "<HOST>:5432"
+    username: "kloudmate"
+    password: "${KLOUDMATE_DB_PASSWORD}"
+    database: "postgres"                   # primary connection database
+    databases_to_monitor:                  # additional databases
+      - "app_db"
+      - "analytics_db"
+    collect_query_metrics: true
+    collect_query_samples: true
+    collect_explain_plans: true
+    collect_schema: true
+    collect_replication_stats: true
+    collection_interval: 10s
+    tls:
+      mode: "require"                      # require | verify-ca | verify-full
+      ca_cert: "/path/to/rds-ca-bundle.pem"
+```
+
+For RDS with IAM authentication:
+
+```yaml
+receivers:
+  kloudmate_postgresql:
+    endpoint: "<RDS_ENDPOINT>:5432"
+    auth_type: "iam"
+    username: "kloudmate"
+    database: "postgres"
+    aws:
+      region: "ap-south-1"
+      instance_endpoint: "<RDS_ENDPOINT>"
+```
+
+***
+
+Cleanup / Uninstall [#cleanup--uninstall]
+
+MySQL [#mysql]
+
+```sql
+DROP PROCEDURE IF EXISTS kloudmate.enable_events_statements_consumers;
+DROP PROCEDURE IF EXISTS kloudmate.explain_statement;
+DROP SCHEMA IF EXISTS kloudmate;
+DROP USER IF EXISTS 'kloudmate'@'%';
+```
+
+PostgreSQL [#postgresql]
+
+```sql
+DROP FUNCTION IF EXISTS kloudmate.pg_stat_activity();
+DROP FUNCTION IF EXISTS kloudmate.pg_stat_statements();
+DROP FUNCTION IF EXISTS kloudmate.explain_statement(TEXT);
+DROP FUNCTION IF EXISTS kloudmate.pg_stat_statements_reset();
+DROP FUNCTION IF EXISTS kloudmate.pg_stat_replication();
+DROP SCHEMA IF EXISTS kloudmate;
+DROP USER IF EXISTS kloudmate;
+```
+
+
+# AWS ASG Deployment
+
+
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+Deploy `kmagent` across an Auto Scaling Group with zero manual per-instance work. Configure once in the Launch Template, every instance (existing + future scale-outs) gets the agent automatically.
+
+***
+
+Prerequisites [#prerequisites]
+
+* AWS CLI configured with appropriate permissions
+* An existing ASG with a Launch Template
+* IAM Instance Profile attached to your ASG instances
+* SSM Agent running on instances (default on Amazon Linux / Ubuntu AMIs)
+
+***
+
+<Steps>
+  <Step>
+    Step 1: Store API Key in SSM Parameter Store [#step-1-store-api-key-in-ssm-parameter-store]
+
+    Never hardcode secrets in user data. Use SSM Parameter Store with encryption:
+
+    ```bash
+    aws ssm put-parameter \
+      --name "/kloudmate/api-key" \
+      --value "your-actual-km-api-key" \
+      --type SecureString \
+      --region ap-south-1
+    ```
+  </Step>
+
+  <Step>
+    Step 2: IAM Permissions [#step-2-iam-permissions]
+
+    Ensure your ASG's IAM Instance Profile has permission to read the SSM parameter:
+
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": "ssm:GetParameter",
+          "Resource": "arn:aws:ssm:ap-south-1:YOUR_ACCOUNT_ID:parameter/kloudmate/*"
+        }
+      ]
+    }
+    ```
+
+    If using **SSM Run Command** (Step 5, Option B), also add:
+
+    ```json
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ssm:SendCommand",
+        "ssm:ListCommandInvocations"
+      ],
+      "Resource": "*"
+    }
+    ```
+  </Step>
+
+  <Step>
+    Step 3: Create the User Data Script [#step-3-create-the-user-data-script]
+
+    Save this as `userdata.sh`:
+
+    ```bash
+    #!/bin/bash
+    set -euo pipefail
+
+    # -----------------------------------------------
+    # Fetch API key from SSM (IMDSv2 compatible)
+    # -----------------------------------------------
+    REGION=$(curl -sf http://169.254.169.254/latest/meta-data/placement/region)
+    TOKEN=$(curl -sf -X PUT "http://169.254.169.254/latest/api/token" \
+      -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
+
+    KM_API_KEY=$(aws ssm get-parameter \
+      --name "/kloudmate/api-key" \
+      --with-decryption \
+      --query "Parameter.Value" \
+      --output text \
+      --region "$REGION")
+
+    # -----------------------------------------------
+    # Install kmagent
+    # -----------------------------------------------
+    curl -fsSL https://raw.githubusercontent.com/kloudmate/km-agent/main/install.sh \
+      | bash -s -- \
+        --api-key "$KM_API_KEY" \
+        --colector-endpoint "https://otel.kloudmate.com"
+
+    # -----------------------------------------------
+    # Verify
+    # -----------------------------------------------
+    if systemctl is-active --quiet kmagent; then
+      echo "[kloudmate] Agent installed and running"
+    else
+      echo "[kloudmate] ERROR: Agent failed to start"
+      journalctl -u kmagent --no-pager -n 20
+      exit 1
+    fi
+    ```
+  </Step>
+
+  <Step>
+    Step 4: Apply User Data to Launch Template [#step-4-apply-user-data-to-launch-template]
+
+    <Tabs items={['Via AWS CLI', 'Via AWS Console']}>
+      <Tab value="Via AWS CLI">
+        ```bash
+        # Create a new Launch Template version with user data
+        aws ec2 create-launch-template-version \
+          --launch-template-name your-template-name \
+          --source-version '$Latest' \
+          --launch-template-data '{
+            "UserData": "'$(base64 -w0 userdata.sh)'"
+          }'
+
+        # Point ASG to use the latest version
+        aws autoscaling update-auto-scaling-group \
+          --auto-scaling-group-name your-asg-name \
+          --launch-template "LaunchTemplateName=your-template-name,Version=\$Latest"
+        ```
+      </Tab>
+
+      <Tab value="Via AWS Console">
+        1. Go to **EC2 → Launch Templates → your-template**
+        2. Click **Actions → Modify template (Create new version)**
+        3. Scroll to **Advanced details → User data**
+        4. Paste the contents of `userdata.sh`
+        5. Click **Create template version**
+        6. Go to **Auto Scaling Groups → your-asg**
+        7. Click **Edit → Launch Template → Version → Latest**
+        8. Save
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step>
+    Step 5: Roll Out to Existing Instances [#step-5-roll-out-to-existing-instances]
+
+    The new user data only executes on **newly launched** instances. To deploy on your existing 50 instances, choose one of the following:
+
+    <Tabs items={['Option A: Instance Refresh', 'Option B: SSM Run Command']}>
+      <Tab value="Option A: Instance Refresh">
+        **Rolling Replace**
+
+        Terminates and replaces instances in batches. Each new instance boots with the updated user data and gets `kmagent` automatically.
+
+        ```bash
+        aws autoscaling start-instance-refresh \
+          --auto-scaling-group-name your-asg-name \
+          --preferences '{
+            "MinHealthyPercentage": 90,
+            "MaxHealthyPercentage": 110,
+            "InstanceWarmup": 120
+          }'
+        ```
+
+        **How it works:**
+
+        * Keeps **90% of instances healthy** at all times
+        * Replaces \~5 instances at a time (for a fleet of 50)
+        * Each batch waits for health checks to pass before proceeding
+        * Total rollout time: \~20-30 minutes depending on health check config
+
+        **Monitor progress:**
+
+        ```bash
+        aws autoscaling describe-instance-refreshes \
+          --auto-scaling-group-name your-asg-name
+        ```
+      </Tab>
+
+      <Tab value="Option B: SSM Run Command">
+        **In-Place Install, No Downtime**
+
+        Installs the agent on running instances without replacing them. Fastest path to full coverage.
+
+        ```bash
+        aws ssm send-command \
+          --targets "Key=tag:aws:autoscaling:groupName,Values=your-asg-name" \
+          --document-name "AWS-RunShellScript" \
+          --parameters 'commands=[
+            "REGION=$(curl -sf http://169.254.169.254/latest/meta-data/placement/region)",
+            "TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H X-aws-ec2-metadata-token-ttl-seconds:60)",
+            "KM_API_KEY=$(aws ssm get-parameter --name /kloudmate/api-key --with-decryption --query Parameter.Value --output text --region $REGION)",
+            "curl -fsSL https://raw.githubusercontent.com/kloudmate/km-agent/main/install.sh | bash -s -- --api-key $KM_API_KEY --collector-endpoint https://otel.kloudmate.com"
+          ]' \
+          --max-concurrency "10" \
+          --max-errors "5" \
+          --comment "Install kmagent on ASG fleet"
+        ```
+
+        **How it works:**
+
+        * Runs on **10 instances at a time** (`--max-concurrency 10`)
+        * All 50 instances done in **5 batches**
+        * Stops if more than 5 instances fail (`--max-errors 5`)
+        * **Zero downtime** — no instance restarts required
+
+        **Monitor progress:**
+
+        ```bash
+        # Get command ID from send-command output, then:
+        aws ssm list-command-invocations \
+          --command-id "COMMAND_ID" \
+          --details \
+          --query "CommandInvocations[].{Instance:InstanceId,Status:Status}" \
+          --output table
+        ```
+      </Tab>
+    </Tabs>
+
+    **Which Option to Choose?**
+
+    | Criteria       | Option A (Instance Refresh)  | Option B (SSM Run Command)   |
+    | -------------- | ---------------------------- | ---------------------------- |
+    | Downtime       | Brief per-instance (rolling) | None                         |
+    | Speed          | \~20-30 min                  | \~5-10 min                   |
+    | Instance state | Fresh instances              | Existing instances preserved |
+    | Risk           | Lower (clean slate)          | Slightly higher (in-place)   |
+    | Use when       | You want clean rollout       | You need it NOW              |
+
+    **Recommended approach:** Use **Option B** for the immediate install on all 50 instances today, and the **Launch Template user data** ensures every future instance is covered automatically.
+  </Step>
+</Steps>
+
+***
+
+Verification [#verification]
+
+After deployment, verify the agent is running across your fleet:
+
+```bash
+# Check all instances via SSM
+aws ssm send-command \
+  --targets "Key=tag:aws:autoscaling:groupName,Values=your-asg-name" \
+  --document-name "AWS-RunShellScript" \
+  --parameters 'commands=["systemctl status kmagent | head -5"]' \
+  --max-concurrency "50" \
+  --output text
+
+# Or SSH into any instance and check
+systemctl status kmagent
+journalctl -u kmagent -f        # follow logs
+curl -s http://localhost:13133   # health check endpoint
+```
+
+***
+
+Troubleshooting [#troubleshooting]
+
+| Issue                          | Cause                                              | Fix                                                                                      |
+| ------------------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `unable to locate credentials` | IAM Instance Profile missing or no SSM permissions | Attach IAM role with `ssm:GetParameter` to your Launch Template                          |
+| `command not found: aws`       | AWS CLI not installed on instance                  | Add `yum install -y aws-cli` or `apt install -y awscli` before the SSM call in user data |
+| `kmagent failed to start`      | Port conflict or config error                      | Check `journalctl -u kmagent -n 50` on the instance                                      |
+| SSM command stuck in `Pending` | SSM Agent not running                              | Ensure `amazon-ssm-agent` is installed and running                                       |
+| Instance refresh stuck         | Health check failing on new instances              | Check your ASG health check grace period and target group settings                       |
+
+
+# Infrastructure as a Code (IaaC) Installation
+
+
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+Deployment Approaches [#deployment-approaches]
+
+| Method               | Best For                    | Cloud Support           |
+| -------------------- | --------------------------- | ----------------------- |
+| **cloud-init**       | New VMs, ASGs, Scale Sets   | All providers           |
+| **Ansible**          | Existing VM fleets          | All providers + on-prem |
+| **Terraform module** | IaaC-managed infrastructure | All providers           |
+| **Packer**           | Pre-baked machine images    | AWS, GCP, Azure         |
+
+Decision Matrix [#decision-matrix]
+
+If you are provisioning a new VM or Auto-scaling group, you should use **cloud-init** via User Data/Custom Data. If you want faster boot times, use **Packer** to pre-bake the image and cloud-init for config only.
+
+If you are managing an existing fleet, use an **Ansible playbook**.
+
+If you are managing infrastructure with **Terraform**, use the **Terraform module**.
+
+***
+
+1. cloud-init (Universal) [#1-cloud-init-universal]
+
+Works on every provider that supports cloud-init (AWS, GCP, Azure, DigitalOcean, Alibaba, Hetzner, Vultr, Linode, etc.)
+
+<Tabs items={['AWS', 'GCP', 'Azure', 'DigitalOcean', 'Alibaba Cloud']}>
+  <Tab value="AWS">
+    **Launch Template User Data**
+
+    ```bash
+    # Encode and attach to launch template
+    base64 -w0 cloud-init/cloud-init.yaml > /tmp/userdata.b64
+
+    aws ec2 create-launch-template \
+      --launch-template-name kmagent-template \
+      --launch-template-data '{
+        "UserData": "'$(cat /tmp/userdata.b64)'"
+      }'
+    ```
+  </Tab>
+
+  <Tab value="GCP">
+    **Instance Template**
+
+    ```bash
+    gcloud compute instance-templates create kmagent-template \
+      --metadata-from-file user-data=cloud-init/cloud-init.yaml \
+      --machine-type e2-medium \
+      --image-family ubuntu-2204-lts \
+      --image-project ubuntu-os-cloud
+    ```
+  </Tab>
+
+  <Tab value="Azure">
+    **VM Scale Set**
+
+    ```bash
+    az vmss create \
+      --name kmagent-vmss \
+      --resource-group myResourceGroup \
+      --image Ubuntu2204 \
+      --custom-data cloud-init/cloud-init.yaml
+    ```
+  </Tab>
+
+  <Tab value="DigitalOcean">
+    ```bash
+    doctl compute droplet create kmagent-node \
+      --image ubuntu-22-04-x64 \
+      --size s-1vcpu-1gb \
+      --user-data-file cloud-init/cloud-init.yaml
+    ```
+  </Tab>
+
+  <Tab value="Alibaba Cloud">
+    Paste `cloud-init.yaml` content into:
+    **ECS Console** → **Instance** → **Advanced Options** → **User Data**
+  </Tab>
+</Tabs>
+
+***
+
+2. Ansible [#2-ansible]
+
+Ansible is perfect for deploying the KloudMate agent to existing VM fleets.
+
+<Steps>
+  <Step>
+    **Navigate to the Ansible directory**
+
+    ```bash
+    cd ansible/
+    ```
+  </Step>
+
+  <Step>
+    **Set your API key**
+
+    ```bash
+    export KM_API_KEY="your-kloudmate-api-key"
+    ```
+  </Step>
+
+  <Step>
+    **Edit your inventory**
+
+    Add your hosts to the inventory file:
+
+    ```bash
+    vim inventories/production.ini
+    ```
+  </Step>
+
+  <Step>
+    **Deploy**
+
+    <Tabs items={['All Hosts', 'Specific Group', 'Dry Run']}>
+      <Tab value="All Hosts">
+        ```bash
+        ansible-playbook -i inventories/production.ini deploy-kmagent.yml \
+          -e "km_api_key=$KM_API_KEY km_endpoint=https://otel.kloudmate.com"
+        ```
+      </Tab>
+
+      <Tab value="Specific Group">
+        ```bash
+        ansible-playbook -i inventories/production.ini deploy-kmagent.yml \
+          -e "km_api_key=$KM_API_KEY km_endpoint=https://otel.kloudmate.com" \
+          --limit aws
+        ```
+      </Tab>
+
+      <Tab value="Dry Run">
+        ```bash
+        ansible-playbook -i inventories/production.ini deploy-kmagent.yml \
+          -e "km_api_key=$KM_API_KEY km_endpoint=https://otel.kloudmate.com" \
+          --check --diff
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+</Steps>
+
+Dynamic Inventory (Auto-discover VMs) [#dynamic-inventory-auto-discover-vms]
+
+Instead of static inventory files, use cloud-native dynamic inventory plugins:
+
+<Tabs items={['AWS', 'GCP', 'Azure']}>
+  <Tab value="AWS">
+    ```bash
+    pip install boto3
+    ansible-playbook -i aws_ec2.yml deploy-kmagent.yml
+    ```
+
+    **Example `aws_ec2.yml` configuration:**
+
+    ```yaml
+    plugin: amazon.aws.aws_ec2
+    regions:
+      - us-east-1
+      - us-west-2
+      - ap-south-1
+    filters:
+      tag:Environment: production
+      instance-state-name: running
+    keyed_groups:
+      - key: tags.Role
+        prefix: role
+      - key: placement.region
+        prefix: region
+    compose:
+      ansible_host: private_ip_address
+    ```
+  </Tab>
+
+  <Tab value="GCP">
+    ```bash
+    pip install google-auth
+    ansible-playbook -i gcp_compute.yml deploy-kmagent.yml
+    ```
+  </Tab>
+
+  <Tab value="Azure">
+    ```bash
+    pip install azure-identity azure-mgmt-compute
+    ansible-playbook -i azure_rm.yml deploy-kmagent.yml
+    ```
+  </Tab>
+</Tabs>
+
+Useful Ansible Commands [#useful-ansible-commands]
+
+```bash
+# Upgrade agent on all hosts
+ansible-playbook deploy-kmagent.yml --tags upgrade \
+  -e "kmagent_version=1.2.0"
+
+# Only reconfigure (no reinstall)
+ansible-playbook deploy-kmagent.yml --tags configure
+
+# Uninstall from specific hosts
+ansible-playbook deploy-kmagent.yml \
+  -e "kmagent_state=absent" --limit "gcp"
+
+# Check agent status across fleet
+ansible all -i inventories/production.ini -m shell \
+  -a "systemctl status kmagent | head -5"
+```
+
+***
+
+3. Terraform Module [#3-terraform-module]
+
+You can easily embed `kmagent` into your Terraform deployments across any provider using our user-data module.
+
+<Tabs items={['Module Usage', 'AWS', 'GCP', 'Azure', 'DigitalOcean']}>
+  <Tab value="Module Usage">
+    ```hcl
+    module "kmagent" {
+      source      = "./modules/user-data"
+      km_api_key  = var.km_api_key
+      km_endpoint = "https://otel.kloudmate.com"
+      kmagent_tags = {
+        env  = "production"
+        team = "platform"
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab value="AWS">
+    **AWS Auto Scaling Group**
+
+    ```hcl
+    resource "aws_launch_template" "app" {
+      name_prefix = "app-"
+      user_data   = base64encode(module.kmagent.cloud_init)
+    }
+
+    resource "aws_autoscaling_group" "app" {
+      launch_template {
+        id      = aws_launch_template.app.id
+        version = "$Latest"
+      }
+      min_size = 2
+      max_size = 20
+    }
+    ```
+  </Tab>
+
+  <Tab value="GCP">
+    **GCP Managed Instance Group**
+
+    ```hcl
+    resource "google_compute_instance_template" "app" {
+      metadata = {
+        user-data = module.kmagent.cloud_init
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab value="Azure">
+    **Azure VM Scale Set**
+
+    ```hcl
+    resource "azurerm_linux_virtual_machine_scale_set" "app" {
+      custom_data = base64encode(module.kmagent.cloud_init)
+    }
+    ```
+  </Tab>
+
+  <Tab value="DigitalOcean">
+    ```hcl
+    resource "digitalocean_droplet" "app" {
+      user_data = module.kmagent.cloud_init
+    }
+    ```
+  </Tab>
+</Tabs>
+
+***
+
+4. Packer (Pre-baked Images) [#4-packer-pre-baked-images]
+
+Best when you want zero install-time latency. The agent binary is baked into the image; only the config (API key) is injected at boot.
+
+<Steps>
+  <Step>
+    **Navigate to the Packer directory**
+
+    ```bash
+    cd packer/
+    ```
+  </Step>
+
+  <Step>
+    **Build your images**
+
+    <Tabs items={['AWS AMI', 'GCP Image', 'Build All']}>
+      <Tab value="AWS AMI">
+        ```bash
+        packer build -only=amazon-ebs.kmagent \
+          -var 'kmagent_version=1.2.0' \
+          kmagent-image.pkr.hcl
+        ```
+      </Tab>
+
+      <Tab value="GCP Image">
+        ```bash
+        packer build -only=googlecompute.kmagent \
+          -var 'gcp_project=my-project' \
+          kmagent-image.pkr.hcl
+        ```
+      </Tab>
+
+      <Tab value="Build All">
+        ```bash
+        packer build kmagent-image.pkr.hcl
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step>
+    **Deploy**
+
+    Use the resulting image in your Launch Template / Instance Template, with minimal user-data that only injects the API key.
+  </Step>
+</Steps>
+
+***
+
+Secret Management [#secret-management]
+
+<Callout type="warn">
+  Never hardcode API keys! Use your cloud's native secret store to securely inject credentials at runtime.
+</Callout>
+
+| Provider         | Service             | Retrieval Command                                                       |
+| ---------------- | ------------------- | ----------------------------------------------------------------------- |
+| **AWS**          | SSM Parameter Store | `aws ssm get-parameter --name /kloudmate/api-key --with-decryption`     |
+| **AWS**          | Secrets Manager     | `aws secretsmanager get-secret-value --secret-id kloudmate-api-key`     |
+| **GCP**          | Secret Manager      | `gcloud secrets versions access latest --secret=kloudmate-api-key`      |
+| **Azure**        | Key Vault           | `az keyvault secret show --name kloudmate-api-key --vault-name myvault` |
+| **DigitalOcean** | Reserved env vars   | Set via doctl or Terraform                                              |
+| **Alibaba**      | KMS                 | `aliyun kms GetSecretValue --SecretName kloudmate-api-key`              |
+
+***
+
+Directory Structure [#directory-structure]
+
+```text
+kmagent-deploy/
+├── ansible/
+│   ├── ansible.cfg
+│   ├── deploy-kmagent.yml          # Main playbook
+│   ├── inventories/
+│   │   └── production.ini          # Static inventory (edit with your hosts)
+│   └── roles/
+│       └── kmagent/
+│           ├── defaults/main.yml   # Configurable variables
+│           ├── handlers/main.yml   # Service reload/restart
+│           ├── tasks/main.yml      # Install, configure, upgrade, uninstall
+│           └── templates/
+│               ├── agent.yaml.j2   # Agent config
+│               └── kmagent.service.j2  # systemd unit
+└── terraform/
+    └── modules/
+        └── user-data/
+            └── main.tf              # Reusable user-data module
+```
+
+
+# Installation
+
+
+
+Choose your environment and run the appropriate installation command:
+
+Docker Installation [#docker-installation]
+
+Docker agent is containerized version of the Agent that collect host level metrics (via `hostmetricreceiver`) and logs (via the volume mounts)
+User can install the agent by running below script
+
+```bash
+KM_API_KEY="<YOUR_API_KEY>" KM_COLLECTOR_ENDPOINT="https://otel.kloudmate.com:4318" bash -c "$(curl -L https://cdn.kloudmate.com/scripts/install_docker.sh)"
+```
+
+<Callout type="info">
+  The Docker agent required `docker.sock` to be mounted to the agent container.
+</Callout>
+
+Linux Installation [#linux-installation]
+
+The agent supports both Debian and Red Hat based systems on **x86\_64** and **ARM64 (aarch64)** architectures.
+Packages are available as `.deb` (Debian/Ubuntu) and `.rpm` (RHEL/CentOS/Fedora).
+
+Install the agent via the automated bash script:
+
+```bash
+KM_API_KEY="<YOUR_API_KEY>" KM_COLLECTOR_ENDPOINT="https://otel.kloudmate.com:4318" bash -c "$(curl -L https://cdn.kloudmate.com/scripts/install_linux.sh)"
+```
+
+Bash script should have various configurable arguments to configure the agent apart from API\_KEY which is required for authentication at exporter. Each of the script should have corresponding uninstall command to remove the agent from the system.
+
+Kubernetes Installation [#kubernetes-installation]
+
+* The agent will run as DaemonSet as well as a Deployment in the cluster and add necessary components to monitor the nodes and pods.
+* you must install `kloudmate-crd` before running helm install command:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kloudmate/km-agent/refs/heads/develop/deployment/helm/km-kube-agent/crds/crd-otel-instrumentation.yaml
+```
+
+You can then install the agent using below Helm commands
+
+```bash
+helm repo add kloudmate https://kloudmate.github.io/km-agent
+helm repo update
+helm install kloudmate-release kloudmate/km-kube-agent --namespace km-agent --create-namespace \
+  --set API_KEY="<YOUR_API_KEY>" \
+  --set COLLECTOR_ENDPOINT="https://otel.kloudmate.com:4318" \
+  --set clusterName="<YOUR_CLUSTER_NAME>" \
+  --set "monitoredNamespaces={MONITORED_NS}" \
+  --set featuresEnabled.apm=true \
+  --set featuresEnabled.logs=true
+```
+
+⚠️NOTE: [#️note]
+
+* For the `monitoredNamespaces` flag the namespaces should be passed as comma-separated values. For example - `--set "monitoredNamespaces={bookinfo,mongodb,cassandra}"` where `bookinfo`,`mongodb` and `cassandra` are the targetted namespaces that you want to monitor.
+
+🚨 **Note:** For private GKE clusters, you will need to either add a firewall rule that allows master nodes access to port `9443/tcp` on worker nodes, or change the existing rule that allows access to port `80/tcp`, `443/tcp` and `10254/tcp` to also allow access to port `9443/tcp`. More information can be found in the [Official GCP Documentation](https://cloud.google.com/load-balancing/docs/tcp/setting-up-tcp#config-hc-firewall). See the [GKE documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters#add_firewall_rules) on adding rules and the [Kubernetes issue](https://github.com/kubernetes/kubernetes/issues/79739) for more detail.
+
+**Note**: To enable APM (Application Performance Monitoring) and logs collection, set the `featuresEnabled.apm` and `featuresEnabled.logs` flags to `true`. By default, metrics and traces are enabled. You can customize these settings based on your monitoring requirements:
+
+* `featuresEnabled.apm=true` - Enables application performance monitoring
+* `featuresEnabled.logs=true` - Enables log collection
+* `featuresEnabled.metrics=true` - Enables metrics collection (enabled by default)
+* `featuresEnabled.traces=true` - Enables trace collection (enabled by default)
+
+⚠️ **Configuration Management**: Manually updating the ConfigMaps for the DaemonSet or Deployment agents is **not recommended**, as these configurations may be overwritten by updates sent from KloudMate APIs. The recommended approach is to use the **KloudMate Agent Config Editor** - a web-based YAML editor that ensures your configurations are properly synchronized and persisted across your infrastructure.
+
+Installing the Agent on Nodes with Taints [#installing-the-agent-on-nodes-with-taints]
+
+If your Kubernetes cluster uses taints on nodes, the agent daemonset pods must have corresponding tolerations to be scheduled successfully. By default, the agent does not apply any tolerations. You can configure tolerations during installation using Helm parameters.
+The helm installation command in this case will look like this -
+
+```bash
+helm install kloudmate-release kloudmate/km-kube-agent --namespace km-agent --create-namespace \
+  --set API_KEY="<YOUR_API_KEY>" --set COLLECTOR_ENDPOINT="https://otel.kloudmate.com:4318" \
+  --set clusterName="<YOUR_CLUSTER_NAME>" \
+  --set "monitoredNamespaces={MONITORED_NS}" \
+  --set tolerations[0].key="env" --set tolerations[0].operator="Equal" --set tolerations[0].value="uat" --set tolerations[0].effect="NoSchedule" \
+  --set tolerations[1].key="env" --set tolerations[1].operator="Equal" --set tolerations[1].value="sb-uat-node" --set tolerations[1].effect="NoSchedule"
+```
+
+In the above example, two tolerations are provided to match the taints configured on the cluster's nodes. This ensures the agent daemonset pods can be scheduled across all desired nodes.
+
+Notes [#notes]
+
+* You can define as many tolerations as needed by incrementing the index (`tolerations[0]`, `tolerations[1]`, etc.).
+* The values of key, operator, value, and effect should match the taints applied to your nodes.
+* If your cluster has no taints, you can skip these parameters. By default, the agent daemonset pods will be automatically scheduled on untainted nodes.
+
+Windows Installation [#windows-installation]
+
+Download and run the Windows (.exe) installer from our [releases page](https://github.com/kloudmate/km-agent/releases).
