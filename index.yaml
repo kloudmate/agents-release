@@ -3,7 +3,7 @@ entries:
   km-kube-agent:
   - apiVersion: v2
     appVersion: 1.2.1
-    created: "2026-04-14T05:25:22.996708447Z"
+    created: "2026-04-14T05:34:44.866752487Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -14,7 +14,7 @@ entries:
       repository: https://open-telemetry.github.io/opentelemetry-helm-charts
       version: 0.109.0
     description: A Helm chart for Kloumate's Kubernetes flavored Agent
-    digest: e76298c8f34b3a051b0098db7779473f342d46ad43002d9367f7c954f7d21b6d
+    digest: d3f01c74ded2a8f1b257cd6b44b0bf32d7540f45971b55232e9f0482ddab2a90
     home: https://www.kloudmate.com
     icon: https://avatars.githubusercontent.com/u/103623326?s=48&v=4
     keywords:
@@ -219,7 +219,7 @@ entries:
     version: 1.1.5
   - apiVersion: v2
     appVersion: 1.1.4
-    created: "2026-04-14T05:25:22.988278848Z"
+    created: "2026-04-14T05:34:44.857039734Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -255,7 +255,7 @@ entries:
     version: 1.1.4
   - apiVersion: v2
     appVersion: 1.1.3
-    created: "2026-04-14T05:25:22.979224321Z"
+    created: "2026-04-14T05:34:44.848765142Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -291,7 +291,7 @@ entries:
     version: 1.1.3
   - apiVersion: v2
     appVersion: 1.1.2
-    created: "2026-04-14T05:25:22.970347712Z"
+    created: "2026-04-14T05:34:44.840882673Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -327,7 +327,7 @@ entries:
     version: 1.1.2
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2026-04-14T05:25:22.962503262Z"
+    created: "2026-04-14T05:34:44.832920705Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -363,7 +363,7 @@ entries:
     version: 1.1.1
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2026-04-14T05:25:22.954390774Z"
+    created: "2026-04-14T05:34:44.824416618Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -397,4 +397,4 @@ entries:
     urls:
     - https://github.com/kloudmate/km-agent/releases/download/1.2.1/km-kube-agent-1.1.0.tgz
     version: 1.1.0
-generated: "2026-04-14T05:25:22.944932735Z"
+generated: "2026-04-14T05:34:44.81605217Z"
