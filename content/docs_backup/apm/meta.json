@@ -1,0 +1,9 @@
+{
+    "title": "APM",
+    "pages": [
+        "index",
+        "manual-instrumentation",
+        "zero-code-instrumentation",
+        "zero-downtime-observability"
+    ]
+}

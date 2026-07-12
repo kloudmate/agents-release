@@ -1,0 +1,11 @@
+{
+    "title": "Components",
+    "pages": [
+        "index",
+        "receivers",
+        "extensions",
+        "processors",
+        "exporters",
+        "connectors"
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "pages": [
+        "index",
+        "architecture",
+        "installation",
+        "configuration",
+        "apm",
+        "databases",
+        "components",
+        "troubleshooting"
+    ]
+}

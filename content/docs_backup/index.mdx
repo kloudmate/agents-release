@@ -1,0 +1,47 @@
+---
+title: KloudMate Agent
+description: An OpenTelemetry Collector distribution with automated deployment, remote configuration, eBPF-powered zero-code observability, and auto-instrumentation support.
+---
+
+**KM-Agent is an [OpenTelemetry Collector distribution](https://opentelemetry.io/docs/concepts/distributions/)** that extends the upstream OpenTelemetry Collector with additional capabilities for simplified deployment, remote configuration management, automated instrumentation, and **eBPF-powered kernel-level observability**. We've bundled a curated set of components optimized for observability in Kubernetes, Linux, Docker, Windows environments, and even on Edge.
+
+## Key Problems Solved
+
+- **Complex Configuration**: Eliminates the steep learning curve of OpenTelemetry Collector configuration
+- **Manual Installation**: Provides automated installation scripts for multiple environments
+- **Configuration Management**: Enables remote configuration through a web interface without SSH access
+- **Blind Spots in Observability**: Using eBPF get instant, zero-code visibility across all services — no SDK integration, no code changes, no restarts
+- **Database Visibility**: Built-in Database Activity Monitoring (DAM) captures SQL operations, latencies, and throughput at the kernel level
+
+### Features
+
+- **Automated Installation**: One-command deployment across Linux, Docker, and Kubernetes
+- **Remote Configuration**: Configure agents through a web interface without your target machine access
+- **Lifecycle Management**: Comprehensive management of OpenTelemetry Collector
+- **Synthetic Monitoring**: Built-in health checks and monitoring capabilities
+- **Multi-Platform Support**: Native support for various deployment environments (including ARM64)
+- **Real-time Dashboards**: Unique agent identification for centralized monitoring
+- **eBPF-Powered Observability**: Kernel-level, zero-code instrumentation for instant application and network visibility
+- **Database Activity Monitoring (DAM)**: Automatic profiling of MySQL, PostgreSQL. Even messaging systems like Redis, Kafka etc.
+- **Zero Downtime Instrumentation**: Observe all services without code changes or application restarts
+
+## Supported Environments
+
+- **Linux** (Debian/Ubuntu, RHEL/CentOS) — x86\_64 and ARM64 (aarch64)
+- **Docker** (Host metrics and log collection)
+- **Kubernetes** (via DaemonSet and Deployment)
+- **Windows** (Windows Server 2016+)
+
+## Supported OpenTelemetry Components
+
+The KloudMate Agent includes a set of OpenTelemetry Collector components including receivers, processors, exporters, and extensions. See the [Components](/docs/components) section for the complete list.
+
+## Next Steps
+
+<Cards>
+  <Card title="Architecture" description="Understand the agent's internal architecture and lifecycle management." href="/docs/architecture" />
+  <Card title="Installation" description="Get the agent running on Linux, Docker, Kubernetes, or Windows." href="/docs/installation" />
+  <Card title="Configuration" description="Learn how to configure the agent locally or via remote management." href="/docs/configuration" />
+  <Card title="APM" description="Application Performance Monitoring with eBPF, zero-code, and manual instrumentation." href="/docs/apm" />
+  <Card title="Databases" description="Monitor database queries, latencies, and throughput automatically." href="/docs/databases" />
+</Cards>

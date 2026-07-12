@@ -1,0 +1,16 @@
+---
+title: Connectors
+description: OpenTelemetry Collector connectors bundled with the KloudMate Agent.
+---
+
+Connectors join two pipelines together, acting as both an exporter in one pipeline and a receiver in another. They enable cross-signal processing and routing.
+
+## Bundled Connectors
+
+| Connector | Description |
+| :--- | :--- |
+| **Span Metrics Connector** | Generates metrics from trace spans (request counts, duration histograms, error rates) |
+| **Forward Connector** | Routes telemetry data between pipelines without transformation |
+| **Count Connector** | Generates count metrics from spans, logs, or data points |
+
+For detailed configuration of each connector, refer to the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/#connectors).
