@@ -20,81 +20,20 @@ Prerequisites [#prerequisites]
 
 <Steps>
   <Step>
-    Step 1: Store API Key in SSM Parameter Store [#step-1-store-api-key-in-ssm-parameter-store]
+    Step 1: Append the User Data Script [#step-1-append-the-user-data-script]
 
-    Never hardcode secrets in user data. Use SSM Parameter Store with encryption:
-
-    ```bash
-    aws ssm put-parameter \
-      --name "/kloudmate/api-key" \
-      --value "your-actual-km-api-key" \
-      --type SecureString \
-      --region ap-south-1
-    ```
-  </Step>
-
-  <Step>
-    Step 2: IAM Permissions [#step-2-iam-permissions]
-
-    Ensure your ASG's IAM Instance Profile has permission to read the SSM parameter:
-
-    ```json
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": "ssm:GetParameter",
-          "Resource": "arn:aws:ssm:ap-south-1:YOUR_ACCOUNT_ID:parameter/kloudmate/*"
-        }
-      ]
-    }
-    ```
-
-    If using **SSM Run Command** (Step 5, Option B), also add:
-
-    ```json
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ssm:SendCommand",
-        "ssm:ListCommandInvocations"
-      ],
-      "Resource": "*"
-    }
-    ```
-  </Step>
-
-  <Step>
-    Step 3: Create the User Data Script [#step-3-create-the-user-data-script]
-
-    Save this as `userdata.sh`:
+    Append the following script to your existing `userdata.sh` script:
 
     ```bash
     #!/bin/bash
     set -euo pipefail
+    # -----------------------------------------------
+    # Install KloudMate Agent
+    # -----------------------------------------------
+    export KM_API_KEY="{KM_API_KEY}"
+    export KM_COLLECTOR_ENDPOINT="https://otel.kloudmate.com:4318"
 
-    # -----------------------------------------------
-    # Fetch API key from SSM (IMDSv2 compatible)
-    # -----------------------------------------------
-    REGION=$(curl -sf http://169.254.169.254/latest/meta-data/placement/region)
-    TOKEN=$(curl -sf -X PUT "http://169.254.169.254/latest/api/token" \
-      -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
-
-    KM_API_KEY=$(aws ssm get-parameter \
-      --name "/kloudmate/api-key" \
-      --with-decryption \
-      --query "Parameter.Value" \
-      --output text \
-      --region "$REGION")
-
-    # -----------------------------------------------
-    # Install kmagent
-    # -----------------------------------------------
-    curl -fsSL https://raw.githubusercontent.com/kloudmate/km-agent/main/install.sh \
-      | bash -s -- \
-        --api-key "$KM_API_KEY" \
-        --colector-endpoint "https://otel.kloudmate.com"
+    bash -c "$(curl -fsSL https://cdn.kloudmate.com/scripts/install_linux.sh)"
 
     # -----------------------------------------------
     # Verify
@@ -110,7 +49,7 @@ Prerequisites [#prerequisites]
   </Step>
 
   <Step>
-    Step 4: Apply User Data to Launch Template [#step-4-apply-user-data-to-launch-template]
+    Step 2: Apply User Data to Launch Template [#step-2-apply-user-data-to-launch-template]
 
     <Tabs items={['Via AWS CLI', 'Via AWS Console']}>
       <Tab value="Via AWS CLI">
@@ -144,7 +83,7 @@ Prerequisites [#prerequisites]
   </Step>
 
   <Step>
-    Step 5: Roll Out to Existing Instances [#step-5-roll-out-to-existing-instances]
+    Step 3: Roll Out to Existing Instances [#step-3-roll-out-to-existing-instances]
 
     The new user data only executes on **newly launched** instances. To deploy on your existing 50 instances, choose one of the following:
 
