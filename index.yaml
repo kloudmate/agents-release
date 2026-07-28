@@ -2,6 +2,42 @@ apiVersion: v1
 entries:
   km-kube-agent:
   - apiVersion: v2
+    appVersion: 2.0.1
+    created: "2026-07-28T08:28:05.636445335Z"
+    dependencies:
+    - condition: cert-manager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: v1.18.2
+    - condition: opentelemetry-operator.enabled
+      name: opentelemetry-operator
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.109.0
+    description: A Helm chart for Kloumate's Kubernetes flavored Agent
+    digest: dfa5730b962667cad4568a16e992936421cb6617c6637bfaf59e883e401fb745
+    home: https://www.kloudmate.com
+    icon: https://avatars.githubusercontent.com/u/103623326?s=48&v=4
+    keywords:
+    - kloudmate
+    - observability
+    - opentelemetry
+    - agent
+    - monitoring
+    - tracing
+    - logs
+    - metrics
+    - apm
+    maintainers:
+    - email: amitava@kloudmate.com
+      name: Amitava Saha
+    name: km-kube-agent
+    sources:
+    - https://github.com/kloudmate/km-agent
+    type: application
+    urls:
+    - https://github.com/kloudmate/agents-release/releases/download/v2.0.1/km-kube-agent-2.0.1.tgz
+    version: 2.0.1
+  - apiVersion: v2
     appVersion: 2.0.0
     created: "2026-07-28T04:42:08.221539214Z"
     dependencies:
@@ -327,7 +363,7 @@ entries:
     version: 1.1.5
   - apiVersion: v2
     appVersion: 1.1.4
-    created: "2026-07-28T04:42:08.213424758Z"
+    created: "2026-07-28T08:28:05.626018788Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -359,11 +395,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.0.0/km-kube-agent-1.1.4.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.0.1/km-kube-agent-1.1.4.tgz
     version: 1.1.4
   - apiVersion: v2
     appVersion: 1.1.3
-    created: "2026-07-28T04:42:08.201107442Z"
+    created: "2026-07-28T08:28:05.614235883Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -395,11 +431,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.0.0/km-kube-agent-1.1.3.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.0.1/km-kube-agent-1.1.3.tgz
     version: 1.1.3
   - apiVersion: v2
     appVersion: 1.1.2
-    created: "2026-07-28T04:42:08.186460274Z"
+    created: "2026-07-28T08:28:05.604680716Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -431,11 +467,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.0.0/km-kube-agent-1.1.2.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.0.1/km-kube-agent-1.1.2.tgz
     version: 1.1.2
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2026-07-28T04:42:08.172922595Z"
+    created: "2026-07-28T08:28:05.595154618Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -467,11 +503,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.0.0/km-kube-agent-1.1.1.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.0.1/km-kube-agent-1.1.1.tgz
     version: 1.1.1
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2026-07-28T04:42:08.159280113Z"
+    created: "2026-07-28T08:28:05.586086469Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -503,6 +539,6 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.0.0/km-kube-agent-1.1.0.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.0.1/km-kube-agent-1.1.0.tgz
     version: 1.1.0
-generated: "2026-07-28T04:42:08.146765793Z"
+generated: "2026-07-28T08:28:05.57319377Z"
