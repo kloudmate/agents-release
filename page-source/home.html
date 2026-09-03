@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KloudMate Agents — V2</title>
+  <meta name="description"
+    content="KloudMate Agent V2 is an OpenTelemetry Collector distribution with zero-code eBPF tracing, automatic service discovery, and managed configuration for Linux, Docker, and Kubernetes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.aura.build/FxFilter.js"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <style>
+    .rounded-xl,
+    .rounded-2xl,
+    .rounded-3xl,
+    .rounded-full,
+    .rounded-lg,
+    .rounded-[24px],
+    .rounded-[28px],
+    .rounded-md {
+      border-radius: 0 !important;
+    }
+  </style>
+  <script>
+    // Configure Tailwind to include our custom 3D transform utilities
+    tailwind.config = {
+      theme: {
+        extend: {
+          // Add any custom theme extensions here if needed
+        }
+      },
+      plugins: [
+        function ({ addUtilities }) {
+          const rotateXUtilities = {};
+          const rotateYUtilities = {};
+          const rotateZUtilities = {};
+          const rotateValues = [0, 5, 10, 15, 20, 30, 45, 75];
+          // Generate rotate-x utilities
+          rotateValues.forEach((value) => {
+            rotateXUtilities[`.rotate-x-${value}`] = {
+              '--tw-rotate-x': `${value}deg`,
+              transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+            };
+            if (value !== 0) {
+              rotateXUtilities[`.-rotate-x-${value}`] = {
+                '--tw-rotate-x': `-${value}deg`,
+                transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+              };
+            }
+          });
+          // Generate rotate-y utilities
+          rotateValues.forEach((value) => {
+            rotateYUtilities[`.rotate-y-${value}`] = {
+              '--tw-rotate-y': `${value}deg`,
+              transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+            };
+            if (value !== 0) {
+              rotateYUtilities[`.-rotate-y-${value}`] = {
+                '--tw-rotate-y': `-${value}deg`,
+                transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+              };
+            }
+          });
+          // Generate rotate-z utilities
+          rotateValues.forEach((value) => {
+            rotateZUtilities[`.rotate-z-${value}`] = {
+              '--tw-rotate-z': `${value}deg`,
+              transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+            };
+            if (value !== 0) {
+              rotateZUtilities[`.-rotate-z-${value}`] = {
+                '--tw-rotate-z': `-${value}deg`,
+                transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+              };
+            }
+          });
+          // Perspective utilities
+          const perspectiveUtilities = {
+            ".perspective-none": { perspective: "none" },
+            ".perspective-dramatic": { perspective: "100px" },
+            ".perspective-near": { perspective: "300px" },
+            ".perspective-normal": { perspective: "500px" },
+            ".perspective-midrange": { perspective: "800px" },
+            ".perspective-distant": { perspective: "1200px" },
+          };
+          // Transform style utilities
+          const transformStyleUtilities = {
+            ".transform-style-preserve-3d": { "transform-style": "preserve-3d" },
+            ".transform-style-flat": { "transform-style": "flat" },
+          };
+          addUtilities({
+            ...rotateXUtilities,
+            ...rotateYUtilities,
+            ...rotateZUtilities,
+            ...perspectiveUtilities,
+            ...transformStyleUtilities,
+          });
+        }
+      ]
+    };
+  </script>
+  <style>
+    @keyframes border-beam {
+      0% {
+        transform: translateY(-100%);
+      }
+
+      100% {
+        transform: translateY(100vh);
+      }
+    }
+  </style>
+  <style>
+    @keyframes fadeSlideBlurIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+        filter: blur(8px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+    }
+
+    .scroll-animate {
+      opacity: 0;
+    }
+  </style>
+  <link id="all-fonts-link-font-geist" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap">
+  <style id="all-fonts-style-font-geist">
+    .font-geist {
+      font-family: 'Geist', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-roboto" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap">
+  <style id="all-fonts-style-font-roboto">
+    .font-roboto {
+      font-family: 'Roboto', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-montserrat" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&amp;display=swap">
+  <style id="all-fonts-style-font-montserrat">
+    .font-montserrat {
+      font-family: 'Montserrat', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-poppins" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap">
+  <style id="all-fonts-style-font-poppins">
+    .font-poppins {
+      font-family: 'Poppins', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-playfair" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&amp;display=swap">
+  <style id="all-fonts-style-font-playfair">
+    .font-playfair {
+      font-family: 'Playfair Display', serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-instrument-serif" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;500;600;700&amp;display=swap">
+  <style id="all-fonts-style-font-instrument-serif">
+    .font-instrument-serif {
+      font-family: 'Instrument Serif', serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-merriweather" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&amp;display=swap">
+  <style id="all-fonts-style-font-merriweather">
+    .font-merriweather {
+      font-family: 'Merriweather', serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-bricolage" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;display=swap">
+  <style id="all-fonts-style-font-bricolage">
+    .font-bricolage {
+      font-family: 'Bricolage Grotesque', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-jakarta" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap">
+  <style id="all-fonts-style-font-jakarta">
+    .font-jakarta {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-manrope" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap">
+  <style id="all-fonts-style-font-manrope">
+    .font-manrope {
+      font-family: 'Manrope', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-space-grotesk" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap">
+  <style id="all-fonts-style-font-space-grotesk">
+    .font-space-grotesk {
+      font-family: 'Space Grotesk', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-work-sans" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&amp;display=swap">
+  <style id="all-fonts-style-font-work-sans">
+    .font-work-sans {
+      font-family: 'Work Sans', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-pt-serif" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&amp;display=swap">
+  <style id="all-fonts-style-font-pt-serif">
+    .font-pt-serif {
+      font-family: 'PT Serif', serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-geist-mono" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&amp;display=swap">
+  <style id="all-fonts-style-font-geist-mono">
+    .font-geist-mono {
+      font-family: 'Geist Mono', monospace !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-space-mono" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap">
+  <style id="all-fonts-style-font-space-mono">
+    .font-space-mono {
+      font-family: 'Space Mono', monospace !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-quicksand" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap">
+  <style id="all-fonts-style-font-quicksand">
+    .font-quicksand {
+      font-family: 'Quicksand', sans-serif !important;
+    }
+  </style>
+  <link id="all-fonts-link-font-nunito" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&amp;display=swap">
+  <style id="all-fonts-style-font-nunito">
+    .font-nunito {
+      font-family: 'Nunito', sans-serif !important;
+    }
+  </style>
+  <style id="border-gradient-shared-style">
+    [style*="--border-gradient"]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      padding: 1px;
+      border-radius: var(--border-radius-before, inherit);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      background: var(--border-gradient);
+      pointer-events: none;
+    }
+  </style>
+  <style>
+    /* 3D Transform utilities */
+    .rotate-x-0 {
+      --tw-rotate-x: 0deg;
+      transform: translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0)) rotateX(var(--tw-rotate-x, 0)) rotateY(var(--tw-rotate-y, 0)) rotateZ(var(--tw-rotate-z, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1)) !important;
+    }
+
+    .rotate-x-20 {
+      --tw-rotate-x: 20deg;
+      transform: translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0)) rotateX(var(--tw-rotate-x, 0)) rotateY(var(--tw-rotate-y, 0)) rotateZ(var(--tw-rotate-z, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1)) !important;
+    }
+
+    .rotate-y-0 {
+      --tw-rotate-y: 0deg;
+      transform: translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0)) rotateX(var(--tw-rotate-x, 0)) rotateY(var(--tw-rotate-y, 0)) rotateZ(var(--tw-rotate-z, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1)) !important;
+    }
+
+    .rotate-y-30 {
+      --tw-rotate-y: 30deg;
+      transform: translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0)) rotateX(var(--tw-rotate-x, 0)) rotateY(var(--tw-rotate-y, 0)) rotateZ(var(--tw-rotate-z, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1)) !important;
+    }
+
+    .rotate-z-0 {
+      --tw-rotate-z: 0deg;
+      transform: translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0)) rotateX(var(--tw-rotate-x, 0)) rotateY(var(--tw-rotate-y, 0)) rotateZ(var(--tw-rotate-z, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1)) !important;
+    }
+
+    .rotate-z-20 {
+      --tw-rotate-z: 20deg;
+      transform: translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0)) rotateX(var(--tw-rotate-x, 0)) rotateY(var(--tw-rotate-y, 0)) rotateZ(var(--tw-rotate-z, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1)) !important;
+    }
+
+    .-rotate-z-20 {
+      --tw-rotate-z: -20deg;
+      transform: translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0)) rotateX(var(--tw-rotate-x, 0)) rotateY(var(--tw-rotate-y, 0)) rotateZ(var(--tw-rotate-z, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1)) !important;
+    }
+
+    .perspective-none {
+      perspective: none !important;
+    }
+
+    .perspective-dramatic {
+      perspective: 100px !important;
+    }
+
+    .perspective-near {
+      perspective: 300px !important;
+    }
+
+    .perspective-normal {
+      perspective: 500px !important;
+    }
+
+    .perspective-midrange {
+      perspective: 800px !important;
+    }
+
+    .perspective-distant {
+      perspective: 1200px !important;
+    }
+
+    .transform-style-preserve-3d {
+      transform-style: preserve-3d !important;
+    }
+
+    .transform-style-flat {
+      transform-style: flat !important;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen antialiased text-slate-200 bg-[#0a0b10]"
+  style="font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial">
+
+
+
+
+  <!-- Background (component) added by Aura -->
+  <div class="aura-background-component fixed w-full top-0 h-[800px]" data-alpha-mask="80"
+    style="mask-image: linear-gradient(180deg, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(180deg, transparent, black 0%, black 80%, transparent);">
+    <div class="aura-background-component top-0 w-full -z-10 absolute h-full" style="">
+      <div data-us-project="zNLwDraPwdiE0ELhd8Z4" class="absolute w-full h-full left-0 top-0 -z-10"></div>
+      <script type="text/javascript">
+        !function () { if (!window.UnicornStudio) { window.UnicornStudio = { isInitialized: !1 }; var i = document.createElement("script"); i.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js", i.onload = function () { window.UnicornStudio.isInitialized || (UnicornStudio.init(), window.UnicornStudio.isInitialized = !0) }, (document.head || document.body).appendChild(i) } }();
+      </script>
+    </div>
+  </div>
+
+  <div
+    class="fixed z-0 pointer-events-none sm:px-6 lg:px-8 border-x flex max-w-7xl border-white/5 mr-auto ml-auto pr-4 pl-4 top-0 right-0 bottom-0 left-0 justify-between"
+    style="">
+    <div class="w-px h-full bg-white/5 relative overflow-hidden">
+      <div
+        class="absolute top-0 left-0 w-full h-[200px] bg-gradient-to-b from-transparent via-orange-500/40 to-transparent animate-[border-beam_5s_linear_infinite]">
+      </div>
+    </div>
+    <div class="w-px h-full bg-white/5 hidden md:block relative overflow-hidden">
+      <div
+        class="absolute top-0 left-0 w-full h-[200px] bg-gradient-to-b from-transparent via-orange-500/40 to-transparent animate-[border-beam_7s_linear_infinite_2s]">
+      </div>
+    </div>
+    <div class="w-px h-full bg-white/5 hidden lg:block relative overflow-hidden">
+      <div
+        class="absolute top-0 left-0 w-full h-[200px] bg-gradient-to-b from-transparent via-orange-500/40 to-transparent animate-[border-beam_5s_linear_infinite_4s]">
+      </div>
+    </div>
+    <div class="w-px h-full bg-white/5 relative overflow-hidden">
+      <div
+        class="absolute top-0 left-0 w-full h-[200px] bg-gradient-to-b from-transparent via-orange-500/40 to-transparent animate-[border-beam_8s_linear_infinite_1s]">
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  <!-- Background decoration -->
+
+
+  <!-- Top nav -->
+  <header class="fixed z-50 top-0 right-0 left-0">
+    <nav class="sm:px-6 lg:px-8 max-w-7xl mr-auto ml-auto pt-5 pr-4 pb-5 pl-4">
+      <div
+        class="flex bg-gradient-to-br from-black/10 to-black/0 border-white/5 border rounded-none pt-3 pr-4 pb-3 pl-4 backdrop-blur-md [--fx-filter:blur(10px)_liquid-glass(5,10)_saturate(1.25)_noise(0.5,1,0)] items-center justify-between">
+
+        <div class="flex items-center gap-3">
+          <a href="#"
+            class="inline-flex items-center justify-center bg-center mix-blend-screen w-[155px] h-[28px] bg-[url(https://framerusercontent.com/images/0DKffaybgkUTX9tYwtLbVoYCp0.svg?width=155&height=28)] bg-cover rounded-none"></a>
+        </div>
+
+        <!-- ★★★ DESKTOP MENU LINKS ADDED HERE ★★★ -->
+        <div class="hidden md:flex items-center gap-8 text-sm text-slate-300">
+          <a href="https://kloudmate.com/pricing" class="group relative flex items-center h-[36px] hover:text-white transition-colors">
+            Pricing
+            <span
+              class="absolute -bottom-[13px] left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_10px_2px_rgba(251,146,60,0.5)]"></span>
+          </a>
+
+          <a href="https://kloudmate.canny.io/changelog" class="group relative flex items-center h-[36px] hover:text-white transition-colors">
+            Changelog
+            <span
+              class="absolute -bottom-[13px] left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_10px_2px_rgba(251,146,60,0.5)]"></span>
+          </a>
+        </div>
+        <!-- END -->
+
+        <div class="flex items-center gap-2">
+          <a href="https://demo.kloudmate.com"
+            class="hidden sm:inline-flex gap-2 hover:from-orange-500 hover:to-yellow-400 transition text-sm font-medium text-white bg-gradient-to-br from-orange-400 to-orange-600 rounded-none px-4 py-2 shadow-[0_0_20px_rgba(255,140,0,0.4)] gap-x-2 gap-y-2 items-center">
+            Playground
+          </a>
+
+          <button
+            class="md:hidden inline-flex hover:bg-white/10 transition text-white/90 bg-white/5 border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3 items-center justify-center"
+            aria-label="Menu" aria-expanded="false" id="mobile-menu-toggle">
+            <iconify-icon icon="solar:hamburger-menu-bold-duotone" class="h-6 w-6 menu-icon" width="24"
+              height="24"></iconify-icon>
+          </button>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+
+      <!-- ★★★ MOBILE MENU UPDATED WITH SAME LINKS ★★★ -->
+      <div id="mobile-menu" class="md:hidden hidden overflow-hidden transition-all duration-300 ease-out"
+        style="max-height: 0;">
+        <div class="mt-3 border border-white/10 bg-white/5 backdrop-blur-md p-4 rounded-none">
+          <div class="flex flex-col gap-3">
+
+            <a href="https://kloudmate.com/pricing"
+              class="text-sm text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5"
+              style="">Pricing</a>
+            <a href="https://kloudmate.canny.io/changelog"
+              class="text-sm text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5"
+              style="">Changelog</a>
+
+            <div class="h-px bg-white/10 my-2"></div>
+
+            <button
+              class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-sm text-white/90 hover:bg-white/10 transition w-full justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                <path
+                  d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4">
+                </path>
+                <path d="M9 18c-4.51 2-5-2-7-2"></path>
+              </svg>
+              GitHub
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <main class="sm:px-6 lg:px-8 max-w-7xl mr-auto ml-auto pt-20 pr-4 pl-4 relative">
+    <section
+      class="grid grid-cols-1 gap-10 lg:gap-12 md:py-14 min-h-[500px] lg:min-h-screen pt-10 pb-10 relative items-center"
+      style="">
+      <div class="z-10 flex-grow flex flex-col md:py-0 pt-14 pb-14 relative justify-center">
+
+        <!-- Top Badge + Users -->
+
+
+        <!-- Floating Badge -->
+        <div class="group relative">
+          <!-- Heading -->
+          <h1
+            class="text-[13vw] md:text-[11vw] lg:text-[8rem] leading-[0.8] uppercase select-none md:text-left md:mt-6 font-medium text-white tracking-tighter font-oswald text-center mix-blend-normal max-w-6xl mt-4">
+
+            <!-- KloudMate -->
+            <span class="inline-block">
+              <span class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[400ms]">K</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[500ms]">l</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[600ms]">o</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[700ms]">u</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[800ms]">d</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[900ms]">M</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1000ms]">a</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1100ms]">t</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1200ms]">e</span></span>
+            </span>
+
+            <!-- Agent -->
+            <span class="inline-flex font-normal pl-0">
+              <style>
+                @keyframes slideDownClip {
+                  0% {
+                    transform: translateY(-105%);
+                  }
+
+                  100% {
+                    transform: translateY(0);
+                  }
+                }
+              </style>
+              <span class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1300ms]">A</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1400ms]">g</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1500ms]">e</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1600ms]">n</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1700ms]">t</span></span>
+            </span>
+
+            <!-- V2 -->
+            <span class="block text-neutral-600">
+              <span class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1800ms]">V</span></span><span
+                class="inline-block overflow-hidden py-1 -my-1"><span
+                  class="inline-block animate-[slideDownClip_0.8s_cubic-bezier(0.16,1,0.3,1)_backwards] delay-[1900ms]">2</span></span>
+            </span>
+          </h1>
+        </div>
+
+        <!-- Description + Button Row -->
+        <div class="flex flex-col md:flex-row md:items-center md:gap-4 md:mt-14 md:mb-24 mt-12 mb-24 gap-x-6 gap-y-6">
+
+          <p class="text-neutral-400 text-base md:text-lg leading-relaxed max-w-xl animate-on-scroll md:text-left text-center mx-auto md:mx-0"
+            data-animation="up" data-delay="800">
+            KloudMate Agent V2 is an OpenTelemetry Collector distribution that instruments your infrastructure
+            without touching a line of code—eBPF-powered tracing, automatic service discovery, and Docker-aware
+            metrics and logs, all managed from a single console.
+          </p>
+
+          <div class="flex flex-col md:flex-row gap-4 md:mx-0 mr-auto ml-auto gap-x-4 gap-y-4 items-center">
+            <a href="/docs"
+              class="group flex overflow-hidden transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_70px_-12px_#f97316] active:scale-[0.98] z-10 text-lg font-semibold text-white bg-black h-14 ring-white/20 ring-1 px-10 relative shadow-[0_0_50px_-12px_#f97316] gap-x-2 gap-y-2 items-center justify-center">
+
+              <div
+                class="absolute inset-0 bg-gradient-to-r from-yellow-500 via-orange-600 to-red-600 opacity-80 transition-opacity duration-300 group-hover:opacity-100"
+                style=""></div>
+
+              <div
+                class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.2),transparent_50%)] mix-blend-overlay">
+              </div>
+              <div
+                class="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.2),transparent_50%)] mix-blend-overlay">
+              </div>
+
+              <div
+                class="transition-all duration-300 group-hover:border-white/70 group-hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.7)] border-white/50 border absolute top-0 right-0 bottom-0 left-0 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)]">
+              </div>
+              <div
+                class="transition-all duration-300 group-hover:border-white/70 group-hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.7)] border-white/50 border absolute top-0 right-0 bottom-0 left-0 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)]">
+              </div>
+
+              <span class="flex items-center gap-2 leading-none z-10 relative drop-shadow-md">See Documentation</span>
+            </a>
+
+            <a href="/docs/upgrade-to-v2"
+              class="group flex transition-all duration-500 hover:scale-[1.03] active:scale-[0.98] hover:shadow-[-15px_0_40px_-5px_rgba(249,115,22,0.6),15px_0_40px_-5px_rgba(255,255,255,0.4)] text-lg font-semibold text-white h-14 pr-10 pl-10 relative gap-x-2 gap-y-2 items-center justify-center"
+              style="background: linear-gradient(#000, #000) padding-box,
+                     linear-gradient(90deg, #f97316 0%, #fbbf24 50%, #ffffff 100%) border-box;
+           border: 1.5px solid transparent">
+              <span class="flex items-center gap-2 leading-none z-10 relative drop-shadow-md">Upgrade To V2</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <div
+        class="flex transform-style-preserve-3d group w-full h-[700px] max-w-[1200px] my-16 relative perspective-[2000px] items-center justify-center">
+        <style class="">
+          @keyframes float-slow {
+
+            0%,
+            100% {
+              transform: translateY(0px);
+            }
+
+            50% {
+              transform: translateY(-10px);
+            }
+          }
+
+          @keyframes float-medium {
+
+            0%,
+            100% {
+              transform: translateY(0px);
+            }
+
+            50% {
+              transform: translateY(-15px);
+            }
+          }
+
+          @keyframes float-fast {
+
+            0%,
+            100% {
+              transform: translateY(0px);
+            }
+
+            50% {
+              transform: translateY(-20px);
+            }
+          }
+
+          .animate-float-slow {
+            animation: float-slow 6s ease-in-out infinite;
+          }
+
+          .animate-float-medium {
+            animation: float-medium 5s ease-in-out infinite;
+          }
+
+          .animate-float-fast {
+            animation: float-fast 4s ease-in-out infinite;
+          }
+        </style>
+
+        <!-- DESKTOP CHAT UI -->
+        <div class="hero-perspective -mt-8 group md:px-0 md:pt-20 my-24 pt-20 pr-4 pb-20 pl-4"
+          style="mask-image: linear-gradient(180deg, transparent, black 0%, black 25%, transparent); -webkit-mask-image: linear-gradient(180deg, transparent, black 0%, black 25%, transparent);">
+          <div
+            class="hero-rotate overflow-hidden transform transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:rotate-x-0 group-hover:rotate-y-0 group-hover:rotate-z-0 group-hover:left-0 group-hover:translate-y-0 group-hover:scale-100 group-hover:shadow-2xl bg-[#0F1012] max-w-[1300px] border-white/10 border rounded-xl mr-auto ml-auto relative left-20 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] rotate-x-20 rotate-y-30 -rotate-z-20"
+            style="mask-image: linear-gradient(180deg, transparent, black 0%, black 50%, transparent); -webkit-mask-image: linear-gradient(180deg, transparent, black 0%, black 50%, transparent);">
+            <div class="shimmer" style=""></div>
+
+            <!-- Mockup Content Grid -->
+            <div class="grid grid-cols-[260px_380px_1fr] divide-x divide-white/5 h-[800px]" style="">
+
+              <!-- Sidebar -->
+              <div class="flex flex-col bg-[#0F1012]" style="">
+                <!-- Workspace Select -->
+                <div class="flex h-14 border-white/5 border-b pr-4 pl-4 gap-y-3 items-center gap-x-0">
+
+                  <span class="ml-3 font-medium text-gray-200">KloudMate</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                    viewBox="0 0 24 24" data-icon="solar:alt-arrow-down-bold"
+                    class="iconify iconify--solar ml-auto w-[16px] h-[16px]" stroke-width="2" data-icon-replaced="true"
+                    style="width: 16px; height: 16px; color: rgb(107, 114, 128);">
+                    <path fill="currentColor"
+                      d="m12.37 15.835l6.43-6.63C19.201 8.79 18.958 8 18.43 8H5.57c-.528 0-.771.79-.37 1.205l6.43 6.63c.213.22.527.22.74 0"
+                      class=""></path>
+                  </svg>
+                </div>
+
+                <div class="p-2 space-y-0.5 flex-1 overflow-y-auto">
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:home-2-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Home</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:widget-4-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Dashboards</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:compass-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Explore</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:magic-stick-3-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Assistant</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:danger-triangle-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Incidents</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:shield-check-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Reliability</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:clipboard-list-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Issues</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-white bg-orange-500/10 border-l-2 border-orange-500 cursor-pointer">
+                    <iconify-icon icon="solar:bell-bold-duotone" class="iconify text-orange-400" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Alerts</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:programming-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">APM &amp; Services</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:radar-2-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">API Monitoring</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:database-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Databases</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:routing-2-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Traces</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:document-text-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Logs</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:code-2-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Code Profiling</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:box-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Inventory</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:server-square-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Hosts</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:atom-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Kubernetes</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:cloud-bolt-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Serverless</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:global-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Network Monitoring</span>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 px-3 py-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-white/5 cursor-pointer transition-colors">
+                    <iconify-icon icon="solar:settings-bold-duotone" class="iconify" width="16" height="16"></iconify-icon>
+                    <span class="text-xs">Settings</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- List View -->
+              <div class="flex flex-col bg-[#0B0C0E]" style="">
+                <!-- List Header -->
+                <div class="flex h-14 border-white/5 border-b pr-5 pl-5 items-center justify-between">
+                  <span class="text-sm font-medium text-gray-400" style="">Active Alerts</span>
+                  <div class="flex gap-3 text-gray-500" style="">
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                      viewBox="0 0 24 24" data-icon="solar:filter-bold-duotone"
+                      class="iconify cursor-pointer hover:text-gray-300 iconify--solar" style="">
+                      <path fill="currentColor" fill-rule="evenodd"
+                        d="M5 3h14L8.816 13.184a2.7 2.7 0 0 0-.778-1.086c-.228-.198-.547-.377-1.183-.736l-2.913-1.64c-.949-.533-1.423-.8-1.682-1.23C2 8.061 2 7.541 2 6.503v-.69c0-1.326 0-1.99.44-2.402C2.878 3 3.585 3 5 3"
+                        clip-rule="evenodd"></path>
+                      <path fill="currentColor"
+                        d="M22 6.504v-.69c0-1.326 0-1.99-.44-2.402C21.122 3 20.415 3 19 3L8.815 13.184q.075.193.121.403c.064.285.064.619.064 1.286v2.67c0 .909 0 1.364.252 1.718c.252.355.7.53 1.594.88c1.879.734 2.818 1.101 3.486.683S15 19.452 15 17.542v-2.67c0-.666 0-1 .063-1.285a2.68 2.68 0 0 1 .9-1.49c.227-.197.545-.376 1.182-.735l2.913-1.64c.948-.533 1.423-.8 1.682-1.23c.26-.43.26-.95.26-1.988"
+                        opacity=".5"></path>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                      viewBox="0 0 24 24" data-icon="solar:sort-vertical-bold-duotone"
+                      class="iconify cursor-pointer hover:text-gray-300 iconify--solar" style="">
+                      <path fill="currentColor"
+                        d="M20 10.875a.75.75 0 0 0 .538-1.272l-4-4.125a.75.75 0 0 0-1.076 0l-4 4.125A.75.75 0 0 0 12 10.875h3.25V18a.75.75 0 0 0 1.5 0v-7.125z"
+                        class="">
+                      </path>
+                      <path fill="currentColor"
+                        d="M12 13.125a.75.75 0 0 1 .538 1.272l-4 4.125a.75.75 0 0 1-1.076 0l-4-4.125A.75.75 0 0 1 4 13.125h3.25V6a.75.75 0 1 1 1.5 0v7.125z"
+                        opacity=".5" class=""></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- List Items -->
+                <div class="flex-1 overflow-y-auto">
+                  <!-- Active Item -->
+                  <div
+                    class="group flex flex-col gap-1 p-4 border-b border-white/5 bg-[#16181D] border-l-2 cursor-pointer border-l-orange-500"
+                    style="">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-xs font-mono text-orange-400" style="">CRITICAL</span>
+                      <div class="w-1 h-1 rounded-full bg-gray-600" style=""></div>
+                      <span class="text-xs text-gray-500" style="">18 days</span>
+                    </div>
+                    <span class="text-sm font-medium text-white" style="">RDS - Database Connections</span>
+                    <div class="flex items-center gap-2 mt-2">
+                      <div class="w-2 h-2 rounded-full animate-pulse bg-yellow-400"></div>
+                      <span class="text-xs text-gray-500" style="">&gt; 3000 users</span>
+                      <div
+                        class="w-5 h-5 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 ml-auto border border-black/50 text-[10px] flex items-center justify-center text-white"
+                        style="">P1</div>
+                    </div>
+                  </div>
+
+                  <!-- Other Items -->
+                  <div
+                    class="group flex flex-col gap-1 p-4 border-b border-white/5 hover:bg-[#131416] cursor-pointer transition-colors"
+                    style="">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-xs font-mono text-gray-500 group-hover:text-gray-400" style="">TROUBLE</span>
+                    </div>
+                    <span class="text-sm text-gray-300 group-hover:text-white" style="">Server: High Memory Utilization</span>
+                    <div class="flex items-center gap-2 mt-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                        viewBox="0 0 24 24" data-icon="solar:check-circle-bold-duotone"
+                        class="iconify text-base iconify--solar text-orange-500" style="">
+                        <path fill="currentColor"
+                          d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2s10 4.477 10 10" opacity=".5"
+                          class=""></path>
+                        <path fill="currentColor"
+                          d="M16.03 8.97a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 0 1-1.06 0l-2-2a.75.75 0 1 1 1.06-1.06l1.47 1.47l2.235-2.235L14.97 8.97a.75.75 0 0 1 1.06 0">
+                        </path>
+                      </svg>
+                      <span class="text-xs text-gray-500" style="">Above 75%</span>
+                      <span class="ml-auto text-xs text-orange-400" style="">12h ago</span>
+                    </div>
+                  </div>
+
+                  <div
+                    class="group flex flex-col gap-1 p-4 border-b border-white/5 hover:bg-[#131416] cursor-pointer transition-colors"
+                    style="">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-xs font-mono text-gray-500 group-hover:text-gray-400" style="">TROUBLE</span>
+                    </div>
+                    <span class="text-sm text-gray-300 group-hover:text-white" style="">Server: High Filesystem Utilization</span>
+                    <div class="flex items-center gap-2 mt-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                        viewBox="0 0 24 24" data-icon="solar:refresh-circle-bold-duotone"
+                        class="iconify text-amber-500 text-base iconify--solar" style="">
+                        <path fill="currentColor"
+                          d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10" opacity=".5"
+                          class=""></path>
+                        <path fill="currentColor" d="M16.5 12a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0"></path>
+                      </svg>
+                      <span class="text-xs text-gray-500" style="">Monitoring</span>
+                      <span class="ml-auto text-xs text-gray-600">3h ago</span>
+                    </div>
+                  </div>
+                  <div
+                    class="group flex flex-col gap-1 p-4 border-b border-white/5 hover:bg-[#131416] cursor-pointer transition-colors"
+                    style="">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-xs font-mono text-gray-500 group-hover:text-gray-400" style="">TROUBLE</span>
+                    </div>
+                    <span class="text-sm text-gray-300 group-hover:text-white" style="">Server: Overall Filesystem Utilization</span>
+                    <div class="flex items-center gap-2 mt-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                        viewBox="0 0 24 24" data-icon="solar:pause-circle-bold-duotone"
+                        class="iconify text-base iconify--solar text-gray-500" style="">
+                        <path fill="currentColor"
+                          d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12s4.477 10 10 10s10-4.477 10-10" opacity=".5"
+                          class=""></path>
+                        <path fill="currentColor" d="M9 9h1.5v6H9zM13.5 9H15v6h-1.5z"></path>
+                      </svg>
+                      <span class="text-xs text-gray-500" style="">Monitoring</span>
+                      <span class="ml-auto text-xs text-gray-600">3h ago</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Detail View -->
+              <div class="flex flex-col bg-[#0B0C0E] relative">
+                <!-- Detail Header -->
+                <div class="flex h-14 border-white/5 border-b pr-6 pl-6 items-center justify-between">
+                  <div class="flex items-center gap-2 text-gray-500" style="">
+                    <span class="text-xs font-mono">Active Alerts</span>
+                    <span class="text-xs">/</span>
+                    <span class="text-xs font-mono text-gray-300" style="">RDS-Database-Connections</span>
+                  </div>
+                  <div class="flex gap-4 text-gray-500" style="">
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                      viewBox="0 0 24 24" data-icon="solar:link-bold-duotone" class="iconify iconify--solar">
+                      <path fill="currentColor"
+                        d="M15.728 3.884c1.434-1.44 3.532-1.47 4.694-.304c1.164 1.168 1.132 3.28-.303 4.72l-2.424 2.433a.75.75 0 0 0 1.063 1.059l2.424-2.433c1.91-1.919 2.15-4.982.303-6.838c-1.85-1.857-4.907-1.615-6.82.304L9.818 7.692c-1.912 1.919-2.152 4.982-.303 6.837a.75.75 0 1 0 1.062-1.058c-1.163-1.168-1.132-3.28.303-4.72z">
+                      </path>
+                      <path fill="currentColor"
+                        d="M14.485 9.47a.75.75 0 0 0-1.063 1.06c1.164 1.168 1.132 3.279-.303 4.72L8.27 20.116c-1.434 1.44-3.532 1.47-4.694.304c-1.163-1.168-1.132-3.28.303-4.72l2.424-2.433a.75.75 0 1 0-1.062-1.059l-2.424 2.433C.906 16.56.666 19.623 2.515 21.48c1.85 1.858 4.907 1.615 6.819-.304l4.848-4.867c1.91-1.918 2.15-4.982.303-6.8w3.org/2000/svg"
+                        aria-hidden="true" role="img" width="1em" height="1em" viewBox="0 0 24 24"
+                        data-icon="solar:menu-dots-bold-duotone" class="iconify iconify--solar">
+                        <path fill="currentColor"
+                          d="M7 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0m14 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0">
+                        </path>
+                        <path fill="currentColor" d="M14 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0" opacity=".5"></path>
+                      </path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-8 overflow-y-auto">
+                  <h2 class="text-2xl font-medium text-white mb-4 tracking-tight" style="">RDS - Database
+                    Connections - Critical</h2>
+
+                  <div class="flex items-center gap-6 mb-8 pb-6 border-b border-white/5" style="">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-6 h-6 rounded-full border border-white/10 bg-white/5 flex items-center justify-center"
+                        style="">
+                        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                          viewBox="0 0 24 24" data-icon="solar:user-bold-duotone"
+                          class="iconify text-gray-400 text-xs iconify--solar" style="">
+                          <circle cx="12" cy="6" r="4" fill="currentColor"></circle>
+                          <path fill="currentColor"
+                            d="M20 17.5c0 2.485 0 4.5-8 4.5s-8-2.015-8-4.5S7.582 13 12 13s8 2.015 8 4.5" opacity=".5">
+                          </path>
+                        </svg>
+                      </div>
+                      <span class="text-sm text-gray-400" style="">Managed by <span class="text-gray-200" style="">Platform
+                          Team</span></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                        viewBox="0 0 24 24" data-icon="solar:clock-circle-bold-duotone"
+                        class="iconify iconify--solar text-yellow-400" style="">
+                        <path fill="currentColor"
+                          d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10" opacity=".5">
+                        </path>
+                        <path fill="currentColor" fill-rule="evenodd"
+                          d="M12 7.25a.75.75 0 0 1 .75.75v3.69l2.28 2.28a.75.75 0 1 1-1.06 1.06l-2.5-2.5a.75.75 0 0 1-.22-.53V8a.75.75 0 0 1 .75-.75"
+                          clip-rule="evenodd"></path>
+                      </svg>
+                      <span class="text-sm text-gray-400" style="">Live Monitoring</span>
+                    </div>
+                    <div class="flex items-center gap-2 ml-auto">
+                      <span
+                        class="text-xs border px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border-yellow-500/20">Threshold:
+                        3000 users</span>
+                    </div>
+                  </div>
+
+                  <div class="space-y-6 text-base text-gray-300 leading-relaxed" style="">
+                    <p class="">KloudMate is tracking active connections on this RDS instance in real time.
+                      This alert fires automatically when the connection count exceeds
+                      <span class="font-mono text-sm bg-white/10 px-1 rounded">3000</span> users — no manual
+                      polling scripts, no custom Lambda functions.
+                    </p>
+
+                    <div class="rounded-lg bg-[#090A0B] border border-white/10 overflow-hidden my-6 shadow-2xl"
+                      style="">
+                      <div class="flex items-center justify-between px-4 py-2 bg-[#131416] border-b border-white/5"
+                        style="">
+                        <span class="text-xs text-gray-500 font-mono" style="">alert-rules.yaml</span>
+                        <span class="text-xs text-gray-600" style="">YAML</span>
+                      </div>
+                      <div class="p-4 font-mono text-xs md:text-sm leading-6 overflow-x-auto">
+                        <div class="text-gray-500" style=""># Synced from the KloudMate console</div>
+                        <div class="flex">
+                          <span class="text-yellow-400" style="">alert</span><span class="text-gray-400"
+                            style="">:</span>
+                        </div>
+                        <div class="pl-4 flex">
+                          <span class="text-orange-300" style="">name</span><span class="text-gray-400"
+                            style="">:</span>&nbsp;<span class="text-orange-400"
+                            style="">RDS - Database Connections</span>
+                        </div>
+                        <div class="pl-4 flex">
+                          <span class="text-orange-300" style="">metric</span><span class="text-gray-400"
+                            style="">:</span>&nbsp;<span class="text-orange-400"
+                            style="">rds.connections.active</span>
+                        </div>
+                        <div class="pl-4 flex">
+                          <span class="text-orange-300" style="">condition</span><span class="text-gray-400"
+                            style="">:</span>&nbsp;<span class="text-orange-400"
+                            style="">gt 3000</span>
+                        </div>
+                        <div class="pl-4 flex">
+                          <span class="text-orange-300" style="">severity</span><span class="text-gray-400"
+                            style="">:</span>&nbsp;<span class="text-orange-400"
+                            style="">critical</span>
+                        </div>
+
+                        <div class="flex mt-2">
+                          <span class="text-gray-500" style=""># Route to the on-call team</span>
+                        </div>
+                        <div class="flex">
+                          <span class="text-yellow-400" style="">notify</span><span class="text-gray-400"
+                            style="">:</span>
+                        </div>
+                        <div class="pl-4 flex">
+                          <span class="text-gray-400" style="">-</span>&nbsp;<span class="text-orange-400"
+                            style="">platform-team</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p class="">This alert has been active for 18 days — connections have stayed above
+                      threshold since the last traffic spike. KloudMate flagged it automatically the moment
+                      it crossed the line.
+                    </p>
+                  </div>
+
+                  <!-- Activity Stream -->
+                  <div class="mt-12 pt-8 border-t border-white/5" style="">
+                    <div class="flex gap-4 mb-6">
+                      <div
+                        class="w-8 h-8 rounded-full border flex items-center justify-center text-xs bg-orange-900/50 border-orange-500/30 text-orange-300"
+                        style="">AC</div>
+                      <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                          <span class="text-sm font-medium text-white" style="">Alex Chen</span>
+                          <span class="text-xs text-gray-500" style="">2 hours ago</span>
+                        </div>
+                        <p class="text-sm text-gray-400" style="">Bumped max_connections on the read replica and
+                          added connection pooling — should bring this under threshold.</p>
+                      </div>
+                    </div>
+                    <div class="flex gap-4">
+                      <div
+                        class="w-8 h-8 rounded-full border flex items-center justify-center text-xs bg-yellow-900/50 border-yellow-500/30 text-yellow-300"
+                        style="">SB</div>
+                      <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                          <span class="text-sm font-medium text-white" style="">Sarah Baker</span>
+                          <span class="text-xs text-gray-500" style="">1 hour ago</span>
+                        </div>
+                        <p class="text-sm text-gray-400" style="">Change deployed to production. Watching the
+                          alert to confirm it clears.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Floating Action in Detail -->
+                <div class="absolute bottom-8 right-8">
+                  <button
+                    class="bg-white text-black hover:bg-gray-200 transition-colors rounded-full p-3 shadow-lg shadow-white/10"
+                    style="">
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+                      viewBox="0 0 24 24" data-icon="solar:play-bold-duotone" class="iconify text-xl iconify--solar">
+                      <path fill="currentColor"
+                        d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.514 2 12 2" opacity=".5"></path>
+                      <path fill="currentColor"
+                        d="M16.22 12.637l-5.717 3.51c-.812.498-1.836-.12-1.836-1.112V8.037c0-.992 1.024-1.61 1.836-1.112l5.717 3.51c.732.45.732 1.552 0 2.002">
+                      </path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sub-logos / trust strip -->
+    <section class="pb-14 gap-x-0 gap-y-0" style="">
+      <div class="max-w-7xl mr-auto ml-auto pt-0 pb-0">
+        <div
+          class="shadow-black/30 overflow-hidden bg-gradient-to-br from-black/10 to-black/0 border-white/5 border rounded-none shadow-2xl backdrop-blur-sm"
+          style="mask-image: linear-gradient(90deg, transparent, black 0%, black 100%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, black 0%, black 100%, transparent);">
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x divide-white/5 gap-x-0 gap-y-0 items-stretch">
+
+            <div
+              class="overflow-hidden flex bg-gradient-to-br from-black/10 to-black/0 w-full pt-10 pr-10 pb-10 pl-10 relative items-center justify-center">
+
+              <div class="flex flex-col lg:flex-row w-full h-[72px] items-center justify-center lg:justify-start">
+
+                <div
+                  class="z-20 flex w-full h-full max-w-[320px] lg:max-w-[360px] items-center justify-center lg:justify-start lg:pr-10">
+                  <p
+                    class="sm:text-xl leading-snug text-lg font-medium text-white/90 tracking-tight text-center lg:text-left">
+                    Built for teams running
+                    Kubernetes, Docker, bare metal, and the cloud
+                  </p>
+                </div>
+
+                <div class="overflow-hidden w-full max-w-full h-full relative"
+                  style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
+
+                  <style>
+                    @keyframes scrollLogos {
+                      0% {
+                        transform: translateX(0);
+                      }
+
+                      100% {
+                        transform: translateX(-50%);
+                      }
+                    }
+
+                    .logo-scroll-container {
+                      display: flex;
+                      animation: scrollLogos 20s linear infinite;
+                      will-change: transform;
+                      height: 100%;
+                      /* Ensure container takes full height for vertical centering */
+                      align-items: center;
+                    }
+
+                    .logo-scroll-container:hover {
+                      animation-play-state: paused;
+                    }
+                  </style>
+
+                  <div class="logo-scroll-container w-max">
+                    <div class="opacity-70 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer flex-shrink-0 flex items-center justify-center h-[72px]"
+                      style="padding-right: 48px;">
+                      <img src="https://cdn.simpleicons.org/docker/ffffff" alt="Docker" class="w-16 h-16 object-contain" />
+                    </div>
+                    <div class="opacity-70 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer flex-shrink-0 flex items-center justify-center h-[72px]"
+                      style="padding-right: 48px;">
+                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS" class="w-20 h-16 object-contain" style="filter: brightness(0) invert(1);" />
+                    </div>
+                    <div class="opacity-70 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer flex-shrink-0 flex items-center justify-center h-[72px]"
+                      style="padding-right: 48px;">
+                      <img src="https://cdn.simpleicons.org/googlecloud/ffffff" alt="Google Cloud Platform" class="w-16 h-16 object-contain" />
+                    </div>
+                    <div class="opacity-70 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer flex-shrink-0 flex items-center justify-center h-[72px]"
+                      style="padding-right: 48px;">
+                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-plain.svg" alt="Microsoft Azure" class="w-16 h-16 object-contain" style="filter: brightness(0) invert(1);" />
+                    </div>
+                    <div class="opacity-70 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer flex-shrink-0 flex items-center justify-center h-[72px]"
+                      style="padding-right: 48px;">
+                      <img src="https://cdn.simpleicons.org/docker/ffffff" alt="Docker" class="w-16 h-16 object-contain" />
+                    </div>
+                    <div class="opacity-70 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer flex-shrink-0 flex items-center justify-center h-[72px]"
+                      style="padding-right: 48px;">
+                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS" class="w-20 h-16 object-contain" style="filter: brightness(0) invert(1);" />
+                    </div>
+                    <div class="opacity-70 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer flex-shrink-0 flex items-center justify-center h-[72px]"
+                      style="padding-right: 48px;">
+                      <img src="https://cdn.simpleicons.org/googlecloud/ffffff" alt="Google Cloud Platform" class="w-16 h-16 object-contain" />
+                    </div>
+                    <div class="opacity-70 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0 cursor-pointer flex-shrink-0 flex items-center justify-center h-[72px]"
+                      style="padding-right: 48px;">
+                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-plain.svg" alt="Microsoft Azure" class="w-16 h-16 object-contain" style="filter: brightness(0) invert(1);" />
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+            <div
+              class="hidden md:flex flex-col bg-center bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/09dc0e81-3730-4910-9053-26ecec7a3816_1600w.webp)] bg-cover pt-12 pr-12 pb-12 pl-12 items-center justify-center"
+              style="">
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section
+      class="shadow-black/30 bg-gradient-to-br from-black/10 to-black/0 border-[#ffffff]/5 border rounded-none pt-0 pr-8 pb-0 pl-8 shadow-2xl backdrop-blur-sm">
+      <div class="max-w-7xl rounded-3xl mr-auto ml-auto pt-12 pb-12">
+        <!-- Header -->
+        <div class="w-full lg:mb-24 mb-20">
+
+          <!-- TEXT CONTAINER ALIGNED LEFT -->
+          <div class="w-full lg:mb-24 mb-20">
+
+            <!-- FULL-WIDTH CONTAINER -->
+            <div class="w-full">
+
+              <!-- TEXT BLOCK LIMITED IN WIDTH, ALIGNED LEFT -->
+              <div class="max-w-4xl">
+
+                <h2 class="lg:text-8xl text-4xl font-normal text-white tracking-tight mb-8"
+                  style="animation: reveal-up 1s cubic-bezier(0.16, 1, 0.3, 1) both;">
+                  Built for <span class="text-white/30">Observability.</span>
+                </h2>
+
+              </div>
+
+              <!-- FULL-WIDTH GRID (not limited by max-w-4xl) -->
+              <div class="delay-100 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 w-full"
+                style="animation: reveal-up 1s cubic-bezier(0.16, 1, 0.3, 1) both">
+
+                <!-- LEFT TEXT BLOCK (limited width) -->
+                <div class="max-w-4xl">
+                  <p class="text-lg text-white/60 font-light leading-relaxed">
+                    KloudMate Agent V2 is a full OpenTelemetry Collector distribution — built on real
+                    receivers, processors, and exporters, not a black box.
+                  </p>
+                </div>
+
+                <!-- RIGHT BUTTON (aligned right) -->
+                <div class="flex gap-4 lg:justify-end items-center w-full">
+
+
+                  <button
+                    class="group flex transition-all duration-500 hover:scale-[1.03] active:scale-[0.98] hover:shadow-[-15px_0_40px_-5px_rgba(249,115,22,0.6),15px_0_40px_-5px_rgba(255,255,255,0.4)] text-lg font-semibold text-white h-14 pr-10 pl-10 relative gap-x-2 gap-y-2 items-center justify-center"
+                    style="background: linear-gradient(#000, #000) padding-box,
+                     linear-gradient(90deg, #f97316 0%, #fbbf24 50%, #ffffff 100%) border-box;
+           border: 1.5px solid transparent">
+                    <span class="flex items-center gap-2 leading-none z-10 relative drop-shadow-md">Learn More</span>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+
+
+        <!-- Feature Panel -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-0"
+          onmousemove="for(const card of this.children){const rect=card.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;card.style.setProperty('--mouse-x', x + 'px');card.style.setProperty('--mouse-y', y + 'px');}">
+
+          <!-- Card 1: Zero-Code eBPF Tracing -->
+          <div
+            class="col-span-1 lg:col-span-2 group flex flex-col overflow-hidden transition-all hover:bg-white/[0.02] bg-zinc-900/50 border-white/5 border rounded-none pt-8 pr-8 pb-8 pl-8 relative backdrop-blur-md justify-between"
+            style="animation: 1s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal both running reveal-up; --mouse-x: 1084px; --mouse-y: 5.5px;">
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%); z-index: 0;">
+            </div>
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.4), transparent 40%); z-index: 0; padding: 1px; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;">
+            </div>
+
+            <div class="relative h-48 mb-6 flex items-center justify-center">
+              <!-- Neural Network Visual -->
+              <div class="relative w-full h-full max-w-[240px]">
+                <svg class="w-full h-full" viewBox="0 0 200 120" fill="none">
+                  <!-- Connections -->
+                  <path d="M40 30 L100 40" stroke="rgba(255,255,255,0.1)" stroke-width="1"></path>
+                  <path d="M40 30 L100 80" stroke="rgba(255,255,255,0.1)" stroke-width="1"></path>
+                  <path d="M40 60 L100 40" stroke="rgba(255,255,255,0.1)" stroke-width="1"></path>
+                  <path d="M40 60 L100 80" stroke="rgba(255,255,255,0.1)" stroke-width="1"></path>
+                  <path d="M40 90 L100 40" stroke="rgba(255,255,255,0.1)" stroke-width="1"></path>
+                  <path d="M40 90 L100 80" stroke="rgba(255,255,255,0.1)" stroke-width="1"></path>
+                  <path d="M100 40 L160 60" stroke="rgba(255,255,255,0.1)" stroke-width="1"></path>
+                  <path d="M100 80 L160 60" stroke="rgba(255,255,255,0.1)" stroke-width="1"></path>
+
+                  <!-- Input Layer -->
+                  <circle cx="40" cy="30" r="4" fill="#6366f1" fill-opacity="0.8"></circle>
+                  <circle cx="40" cy="60" r="4" fill="#6366f1" fill-opacity="0.8"></circle>
+                  <circle cx="40" cy="90" r="4" fill="#6366f1" fill-opacity="0.8"></circle>
+
+                  <!-- Hidden Layer -->
+                  <circle cx="100" cy="40" r="5" fill="#a855f7"></circle>
+                  <circle cx="100" cy="80" r="5" fill="#a855f7" class=""></circle>
+
+                  <!-- Output Layer -->
+                  <circle cx="160" cy="60" r="6" fill="#10b981" class="animate-pulse"></circle>
+                </svg>
+
+                <!-- Floating Labels -->
+                <div class="absolute top-2 left-0 text-[10px] font-mono uppercase tracking-wider text-orange-400/60"
+                  style="">
+                  Input
+                </div>
+                <div
+                  class="absolute bottom-2 right-0 text-[10px] font-mono uppercase tracking-wider text-yellow-400/60">
+                  Output
+                </div>
+              </div>
+            </div>
+
+            <div class="relative z-10">
+              <h3 class="text-lg font-medium text-white mb-2 tracking-tight flex items-center gap-2">
+                Zero-Code eBPF Tracing
+              </h3>
+              <p class="text-sm text-white/50 font-light leading-relaxed">
+                Capture RED metrics and spans straight from the kernel — no SDK, no code changes, no restart.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 2: Auto-Discovered Services -->
+          <div
+            class="col-span-1 lg:col-span-2 group flex flex-col overflow-hidden transition-all hover:bg-white/[0.02] bg-zinc-900/50 border-white/5 border rounded-none pt-8 pr-8 pb-8 pl-8 relative backdrop-blur-md justify-between"
+            style="animation: 1s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal both running reveal-up; --mouse-x: 700.671875px; --mouse-y: 5.5px;">
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%); z-index: 0;">
+            </div>
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.4), transparent 40%); z-index: 0; padding: 1px; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;">
+            </div>
+
+            <div class="relative h-48 mb-6 flex flex-col items-center justify-center">
+              <div class="w-full max-w-[240px] space-y-3">
+                <!-- User Item High Risk -->
+                <div
+                  class="flex items-center justify-between p-2.5 rounded-md border border-red-500/20 bg-red-500/5 transform group-hover:scale-105 transition-transform duration-300">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="h-6 w-6 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-[10px] font-bold text-white ring-1 ring-white/20"
+                      style="">
+                      CS
+                    </div>
+                    <span class="text-xs font-medium text-white/90">checkout-service</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                    <span class="text-xs font-mono font-semibold text-red-400">612ms</span>
+                  </div>
+                </div>
+                <!-- User Item Med Risk -->
+                <div
+                  class="flex items-center justify-between p-2.5 rounded-md border border-white/5 bg-white/5 opacity-60">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="h-6 w-6 rounded-full bg-zinc-700 flex items-center justify-center text-[10px] font-bold text-white ring-1 ring-white/10">
+                      PA
+                    </div>
+                    <span class="text-xs font-medium text-white/90">payments-api</span>
+                  </div>
+                  <span class="text-xs font-mono font-semibold text-yellow-400">184ms</span>
+                </div>
+                <!-- User Item Low Risk -->
+                <div
+                  class="flex items-center justify-between p-2.5 rounded-md border border-white/5 bg-white/5 opacity-40">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="h-6 w-6 rounded-full bg-zinc-700 flex items-center justify-center text-[10px] font-bold text-white ring-1 ring-white/10">
+                      IW
+                    </div>
+                    <span class="text-xs font-medium text-white/90">inventory-worker</span>
+                  </div>
+                  <span class="text-xs font-mono font-semibold text-yellow-400">42ms</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative z-10">
+              <h3 class="text-lg font-medium text-white mb-2 tracking-tight">
+                Auto-Discovered Services
+              </h3>
+              <p class="text-sm text-white/50 font-light leading-relaxed">
+                Apps and containers show up automatically once the agent is installed — no manual setup per host.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 3: Trend-Aware Metrics -->
+          <div
+            class="col-span-1 lg:col-span-2 group flex flex-col overflow-hidden transition-all hover:bg-white/[0.02] bg-zinc-900/50 border-white/5 border rounded-none pt-8 pr-8 pb-8 pl-8 relative backdrop-blur-md justify-between"
+            style="animation: 1s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal both running reveal-up; --mouse-x: 317.3359375px; --mouse-y: 5.5px;">
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%); z-index: 0;">
+            </div>
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.4), transparent 40%); z-index: 0; padding: 1px; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;">
+            </div>
+
+            <div class="relative h-48 mb-6 flex items-end justify-center px-2 pb-4">
+              <!-- Chart Visual -->
+              <div
+                class="relative w-full h-32 border-l border-b border-white/10 group-hover:border-white/20 transition-colors">
+                <!-- Forecast Line -->
+                <svg class="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
+                  <path d="M0 100 L20 80 L40 85 L60 50 L80 40 L100 20 L100 100 Z" fill="none"></path>
+                  <path d="M0 100 L20 80 L40 85 L60 50 L80 40 L100 20" fill="none" stroke="#a855f7" stroke-width="2"
+                    vector-effect="non-scaling-stroke" class=""></path>
+                  <!-- Dotted Future Prediction -->
+                  <path d="M100 20 L120 15 L140 10" fill="none" stroke="#a855f7" stroke-width="2" stroke-dasharray="4 4"
+                    opacity="0.6" vector-effect="non-scaling-stroke"></path>
+                  <!-- Point -->
+                  <circle cx="100" cy="20" r="3" fill="#fff"></circle>
+                </svg>
+
+                <div
+                  class="absolute -top-6 right-0 text-[10px] px-2 py-0.5 rounded-full border font-mono shadow-sm bg-yellow-500/10 text-yellow-300 border-yellow-500/20"
+                  style="">
+                  +14.5% proj
+                </div>
+              </div>
+            </div>
+
+            <div class="relative z-10">
+              <h3 class="text-lg font-medium text-white mb-2 tracking-tight">
+                Trend-Aware Metrics
+              </h3>
+              <p class="text-sm text-white/50 font-light leading-relaxed">
+                Track infrastructure metrics over time and spot regressions before they become incidents.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 4: Managed Collector Config (Wide) -->
+          <div
+            class="col-span-1 lg:col-span-3 group flex flex-col overflow-hidden transition-all hover:bg-white/[0.02] bg-zinc-900/50 border-white/5 border rounded-none pt-8 pr-8 pb-8 pl-8 relative backdrop-blur-md justify-between"
+            style="min-height: 320px; animation: 1s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal both running reveal-up; --mouse-x: 1084px; --mouse-y: -358px;">
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%); z-index: 0;">
+            </div>
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.4), transparent 40%); z-index: 0; padding: 1px; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;">
+            </div>
+
+            <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity z-10">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-workflow text-white">
+                <rect width="8" height="8" x="3" y="3" rx="2"></rect>
+                <rect width="8" height="8" x="13" y="13" rx="2"></rect>
+                <path d="m8 11 3 3"></path>
+                <path d="m11 8 3 3"></path>
+              </svg>
+            </div>
+
+            <div class="relative flex-1 mb-8 flex items-center justify-center">
+              <!-- Pipeline Editor UI -->
+              <div class="relative w-full h-40 flex items-center justify-center gap-4">
+                <!-- Node 1 -->
+                <div
+                  class="w-24 p-2.5 rounded-md bg-zinc-800 border border-white/10 shadow-lg flex flex-col items-center gap-2 z-10 group-hover:-translate-y-1 transition-transform duration-500">
+                  <div class="flex items-center gap-2 w-full mb-1">
+                    <div class="h-2 w-2 rounded-full shadow-[0_0_8px_rgba(96,165,250,0.5)] bg-orange-400" style="">
+                    </div>
+                    <div class="h-1 w-10 bg-white/30 rounded-full"></div>
+                  </div>
+                  <div class="space-y-1 w-full opacity-50">
+                    <div class="h-1 w-full bg-white/20 rounded-full"></div>
+                    <div class="h-1 w-2/3 bg-white/20 rounded-full"></div>
+                  </div>
+                </div>
+                <!-- Line -->
+                <div class="h-px w-12 bg-gradient-to-r from-orange-400/30 to-yellow-400/30" style=""></div>
+                <!-- Node 2 -->
+                <div
+                  class="w-24 p-2.5 rounded-md bg-zinc-800 border border-white/10 shadow-lg flex flex-col items-center gap-2 z-10 group-hover:-translate-y-1 transition-transform duration-500 delay-75">
+                  <div class="flex items-center gap-2 w-full mb-1">
+                    <div class="h-2 w-2 rounded-full shadow-[0_0_8px_rgba(192,132,252,0.5)] bg-yellow-400" style="">
+                    </div>
+                    <div class="h-1 w-8 bg-white/30 rounded-full"></div>
+                  </div>
+                  <div class="space-y-1 w-full opacity-50">
+                    <div class="h-1 w-full bg-white/20 rounded-full"></div>
+                    <div class="h-1 w-2/3 bg-white/20 rounded-full"></div>
+                  </div>
+                </div>
+                <!-- Line -->
+                <div class="h-px w-12 bg-gradient-to-r to-yellow-400/30 from-yellow-400/30" style=""></div>
+                <!-- Node 3 -->
+                <div
+                  class="w-24 p-2.5 rounded-md bg-zinc-800 border border-white/10 shadow-lg flex flex-col items-center gap-2 z-10 group-hover:-translate-y-1 transition-transform duration-500 delay-150">
+                  <div class="flex items-center gap-2 w-full mb-1">
+                    <div class="h-2 w-2 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.5)] bg-yellow-400"></div>
+                    <div class="h-1 w-12 bg-white/30 rounded-full"></div>
+                  </div>
+                  <div class="space-y-1 w-full opacity-50">
+                    <div class="h-1 w-full bg-white/20 rounded-full"></div>
+                    <div class="h-1 w-2/3 bg-white/20 rounded-full"></div>
+                  </div>
+                </div>
+
+                <!-- Connector Dots -->
+                <div
+                  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[100px] pointer-events-none">
+                  <div
+                    class="absolute top-[50%] left-[28%] w-1.5 h-1.5 rounded-full animate-ping opacity-20 bg-orange-400"
+                    style="">
+                  </div>
+                  <div
+                    class="absolute top-[50%] right-[28%] w-1.5 h-1.5 rounded-full animate-ping opacity-20 delay-500 bg-yellow-400">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative z-10 mt-auto">
+              <h3 class="text-xl font-medium text-white mb-2 tracking-tight">
+                Managed Collector Config
+              </h3>
+              <p class="text-sm text-white/50 font-light leading-relaxed max-w-md">
+                Sync OpenTelemetry Collector configuration from the console — receivers, processors, and
+                exporters, no hand-edited YAML per host.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 5: Automated Alerting (Wide) -->
+          <div
+            class="col-span-1 lg:col-span-3 group flex flex-col overflow-hidden transition-all hover:bg-white/[0.02] bg-zinc-900/50 border-white/5 border rounded-none pt-8 pr-8 pb-8 pl-8 relative backdrop-blur-md justify-between"
+            style="min-height: 320px; animation: 1s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal both running reveal-up; --mouse-x: 509px; --mouse-y: -358px;">
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%); z-index: 0;">
+            </div>
+            <div
+              class="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style="background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.4), transparent 40%); z-index: 0; padding: 1px; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;">
+            </div>
+
+            <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity z-10">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-zap text-white">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
+
+            <div class="relative flex-1 mb-8 flex items-center justify-center">
+              <!-- Automation UI -->
+              <div class="w-full max-w-sm space-y-3">
+                <div
+                  class="flex items-center gap-3 p-3 rounded-md border shadow-sm backdrop-blur-sm bg-orange-500/10 border-orange-500/20"
+                  style="">
+                  <div
+                    class="flex h-8 w-8 items-center justify-center rounded-full shrink-0 bg-orange-500/20 text-orange-400"
+                    style="">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="lucide lucide-check">
+                      <path d="M20 6 9 17l-5-5"></path>
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-orange-200" style="">Page On-Call Engineer</div>
+                    <div class="text-[10px] font-mono mt-0.5 text-orange-200/60" style="">Executed 2m ago • Policy #842
+                    </div>
+                  </div>
+                  <div class="h-1.5 w-1.5 rounded-full bg-orange-500" style=""></div>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-md bg-white/5 border border-white/5 opacity-60">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/60 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="lucide lucide-clock">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <div class="">
+                    <div class="text-xs font-medium text-white/80">Notify #incidents Channel</div>
+                    <div class="text-[10px] text-white/40 font-mono mt-0.5">Scheduled in 5m</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative z-10 mt-auto">
+              <h3 class="text-xl font-medium text-white mb-2 tracking-tight">
+                Automated Alerting
+              </h3>
+              <p class="text-sm text-white/50 font-light leading-relaxed max-w-md">
+                Route alerts to the right engineers automatically, so incidents reach the right person before
+                they escalate.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="pb-0 relative" style="min-height: 2400px">
+      <div
+        class="shadow-black/30 bg-gradient-to-br from-black/10 to-black/0 border-white/5 border mt-12 mb-20 pt-12 pr-8 pb-12 pl-8 shadow-2xl backdrop-blur-sm">
+        <!-- Header -->
+        <div class="w-full pb-24">
+
+          <!-- TEXT BLOCK LIMITED IN WIDTH, ALIGNED LEFT -->
+          <div class="max-w-4xl">
+
+            <h2 class="lg:text-8xl text-4xl font-normal text-white tracking-tight mb-8"
+              style="animation: reveal-up 1s cubic-bezier(0.16, 1, 0.3, 1) both;">
+              How the Agent <span class="text-white/30">Works.</span>
+            </h2>
+
+          </div>
+
+          <!-- FULL-WIDTH GRID (not limited by max-w-4xl) -->
+          <div class="delay-100 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 w-full"
+            style="animation: reveal-up 1s cubic-bezier(0.16, 1, 0.3, 1) both">
+
+            <!-- LEFT TEXT BLOCK (limited width) -->
+            <div class="max-w-4xl">
+              <p class="text-lg text-white/60 font-light leading-relaxed">
+                A single agent that streamlines the journey from install to full observability. Discover your
+                services, trace them at the kernel level, and route alerts before incidents escalate.
+              </p>
+            </div>
+
+            <!-- RIGHT BUTTON (aligned right) -->
+            <div class="flex gap-4 lg:justify-end items-center w-full">
+
+
+              <button
+                class="group flex transition-all duration-500 hover:scale-[1.03] active:scale-[0.98] hover:shadow-[-15px_0_40px_-5px_rgba(249,115,22,0.6),15px_0_40px_-5px_rgba(255,255,255,0.4)] text-lg font-semibold text-white h-14 pr-10 pl-10 relative gap-x-2 gap-y-2 items-center justify-center"
+                style="background: linear-gradient(#000, #000) padding-box,
+                     linear-gradient(90deg, #f97316 0%, #fbbf24 50%, #ffffff 100%) border-box;
+           border: 1.5px solid transparent">
+                <span class="flex items-center gap-2 leading-none z-10 relative drop-shadow-md">Get Started</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Sticky Stack Container -->
+        <div class="relative" style="min-height: 2400px">
+          <!-- Step 1 Card -->
+          <div class="sticky mb-8 top-32">
+            <div
+              class="shadow-black/30 sm:pd2e32]/95 border-white/10 border pt-4 pr-4 pb-4 pl-4 shadow-2xl backdrop-blur-sm">
+              <div class="grid grid-cols-1 lg:grid-cols-12 lg:gap-8 gap-8 gap-x-8 gap-y-8 items-center">
+                <div class="lg:col-span-2 flex items-center justify-center">
+                  <span
+                    class="text-[120px] sm:text-[140px] leading-none font-bold tracking-tighter text-white/5 select-none font-variant-numeric tabular-nums">01</span>
+                </div>
+                <div class="lg:col-span-5">
+                  <h3 class="sm:text-3xl text-2xl font-semibold text-white tracking-tight">Install the Agent</h3>
+                  <p class="sm:text-lg text-base text-slate-300 mt-4" style="">Install KloudMate Agent V2 on your
+                    hosts, containers, or Kubernetes cluster. It starts discovering
+                    services and collecting metrics immediately.</p>
+                  <div class="mt-6 flex flex-col gap-4">
+                    <div
+                      class="inline-flex text-sm text-slate-200 w-full max-w-full border-white/10 border rounded-2xl px-4 py-3 shadow-sm gap-3 items-center"
+                      style="box-shadow: rgba(0, 0, 0, 0.25) 0px -12px 24px inset, rgba(255, 255, 255, 0.04) 0px 1px 0px inset;">
+                      <span
+                        class="inline-flex items-center justify-center shrink-0 w-10 h-10 ring-white/10 ring-1 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="h-4.5 w-4.5 text-white/90">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                          <path d="M2 12h20"></path>
+                        </svg>
+                      </span>
+                      <span class="font-medium tracking-[-0.01em]">Zero-config service discovery.</span>
+                    </div>
+                    <div
+                      class="inline-flex text-sm text-slate-200 w-full max-w-full border-white/10 border rounded-2xl px-4 py-3 shadow-sm gap-3 items-center"
+                      style="box-shadow: rgba(0, 0, 0, 0.25) 0px -12px 24px inset, rgba(255, 255, 255, 0.04) 0px 1px 0px inset;">
+                      <span
+                        class="inline-flex items-center justify-center shrink-0 w-10 h-10 ring-white/10 ring-1 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="h-4.5 w-4.5 text-white/90">
+                          <path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"></path>
+                          <path d="M2 6h4"></path>
+                          <path d="M2 10h4"></path>
+                          <path d="M2 14h4"></path>
+                          <path d="M2 18h4"></path>
+                          <path
+                            d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z">
+                          </path>
+                        </svg>
+                      </span>
+                      <span class="font-medium tracking-[-0.01em]">Docker-aware out of the box.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="lg:col-span-5 relative">
+                  <style>
+                    @keyframes floatBadge {
+
+                      0%,
+                      100% {
+                        transform: translateY(0px);
+                      }
+
+                      50% {
+                        transform: translateY(-8px);
+                      }
+                    }
+
+                    @keyframes slideInFromTop {
+                      from {
+                        transform: translateY(-20px);
+                        opacity: 0;
+                      }
+
+                      to {
+                        transform: translateY(0);
+                        opacity: 1;
+                      }
+                    }
+
+                    @keyframes slideInFromBottom {
+                      from {
+                        transform: translateY(20px);
+                        opacity: 0;
+                      }
+
+                      to {
+                        transform: translateY(0);
+                        opacity: 1;
+                      }
+                    }
+
+                    @keyframes pulse {
+
+                      0%,
+                      100% {
+                        opacity: 1;
+                      }
+
+                      50% {
+                        opacity: 0.7;
+                      }
+                    }
+                  </style>
+                  <div class="relative overflow-hidden border border-white/10 bg-white/[0.03] shadow-lg aspect-[4/3]">
+                    <div
+                      class="bg-gradient-to-br from-white/10 via-white/0 to-white/10 opacity-20 absolute top-0 right-0 bottom-0 left-0"
+                      style="background-image: linear-gradient(0deg, rgba(255,255,255,0.06) 1px, rgba(0,0,0,0) 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, rgba(0,0,0,0) 1px); background-size: 48&lt;/div&gt;
+                &lt;div class=" pointer-events-none="" absolute="" inset-0="" rounded-2xl="" ring-1="" ring-white=""
+                      10"=""></div>
+                    <div class="absolute left-8 right-8 top-10"
+                      style="animation: slideInFromTop 0.6s ease-out 0.2s both;">
+                      <div
+                        class="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md px-5 py-4 shadow-black/30 shadow-lg">
+                        <div class="flex items-center gap-3">
+                          <div class="h-8 w-8 rounded-full ring-1 ring-white/15 flex items-center justify-center"
+                            style="background: radial-gradient(60% 60% at 50% 50%, rgba(139,92,246,.35), rgba(99,102,241,.35)); animation: pulse 2s ease-in-out infinite;">
+                            <span class="text-xs font-medium text-white/90">M</span>
+                          </div>
+                          <span class="text-sm sm:text-base font-medium tracking-[-0.01em] text-slate-200"
+                            style="">Agent</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="absolute left-8 right-8 bottom-8"
+                      style="animation: slideInFromBottom 0.6s ease-out 0.4s both;">
+                      <div
+                        class="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md px-5 py-4 shadow-lg shadow-black/40"
+                        style="animation: floatBadge 3s ease-in-out infinite;">
+                        <div class="flex items-start justify-between gap-4">
+                          <p class="text-slate-200 text-base sm:text-lg leading-snug" style="">Service discovered:
+                            checkout-service
+                            &amp; payments-api.</p>
+                          <div class="flex items-center gap-2 shrink-0">
+                            <button
+                              class="h-flex items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 transition-all hover:bg-white/10 hover:scale-110">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="text-white/80 h-4.5 w-4.5">
+                                <path d="M12 19v3"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <rect x="9" y="2" width="6" height="13" rx="3"></rect>
+                              </svg>
+                            </button>
+                            <button
+                              class="h-8 w-8 inline-flex items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 transition-all hover:bg-white/10 hover:scale-110">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="text-white/80 h-4.5 w-4.5">
+                                <path
+                                  d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z">
+                                </path>
+                                <path d="m21.854 2.147-10.94 10.939"></path>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pointer-events-none absolute -inset-1 rounded-2xl opacity-60 blur-xl"
+                      style="background: radial-gradient(60% 60% at 70% 20%, rgba(99,102,241,.18), rgba(217,70,239,0) 70%);">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 Card -->
+          <div class="sticky mb-8 top-36">
+            <div
+              class="shadow-black/30 sm:pd2e32]/95 bg-zinc-950 border-white/10 border pt-4 pr-4 pb-4 pl-4 shadow-2xl backdrop-blur-sm">
+              <div class="grid grid-cols-1 lg:grid-cols-12 lg:gap-8 gap-8 items-center">
+                <div class="lg:col-span-2 flex items-center justify-center">
+                  <span
+                    class="text-[120px] sm:text-[140px] leading-none font-bold tracking-tighter text-white/5 select-none font-variant-numeric tabular-nums">02</span>
+                </div>
+                <div class="lg:col-span-5">
+                  <h3 class="text-2xl sm:text-3xl font-semibold text-white tracking-tight">Trace Everything, Automatically</h3>
+                  <p class="text-base sm:text-lg text-slate-300 mt-4" style="">eBPF captures RED metrics and spans
+                    for every discovered service. Turn tracing on per service from the console
+                    whenever you're ready.</p>
+                  <div class="mt-6 flex flex-col gap-4">
+                    <div
+                      class="inline-flex text-sm text-slate-200 w-full max-w-full border-white/10 border rounded-2xl px-4 py-3 shadow-sm gap-3 items-center"
+                      style="box-shadow: rgba(0, 0, 0, 0.25) 0px -12px 24px inset, rgba(255, 255, 255, 0.04) 0px 1px 0px inset;">
+                      <span
+                        class="inline-flex items-center justify-center shrink-0 w-10 h-10 rounded-xl ring-white/10 ring-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="h-4.5 w-4.5 text-white/90">
+                          <circle cx="12" cy="12" r="1"></circle>
+                          <circle cx="12" cy="5" r="1"></circle>
+                          <circle cx="12" cy="19" r="1"></circle>
+                        </svg>
+                      </span>
+                      <span class="font-medium tracking-[-0.01em]">Kernel-level span capture.</span>
+                    </div>
+                    <div
+                      class="inline-flex text-sm text-slate-200 w-full max-w-full border-white/10 border rounded-2xl px-4 py-3 shadow-sm gap-3 items-center"
+                      style="box-shadow: rgba(0, 0, 0, 0.25) 0px -12px 24px inset, rgba(255, 255, 255, 0.04) 0px 1px 0px inset;">
+                      <span
+                        class="inline-flex items-center justify-center shrink-0 w-10 h-10 ring-white/10 ring-1 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="h-4.5 w-4.5 text-white/90">
+                          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                      </span>
+                      <span class="font-medium tracking-[-0.01em]">Toggle tracing per service.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="lg:col-span-5 relative" style="">
+                  <style>
+                    @keyframes spin {
+                      from {
+                        transform: rotate(0deg);
+                      }
+
+                      to {
+                        transform: rotate(360deg);
+                      }
+                    }
+
+                    @keyframes progressGrow {
+                      from {
+                        width: 0%;
+                      }
+
+                      to {
+                        width: 65%;
+                      }
+                    }
+
+                    @keyframes scaleIn {
+                      from {
+                        transform: scale(0.8);
+                        opacity: 0;
+                      }
+
+                      to {
+                        transform: scale(1);
+                        opacity: 1;
+                      }
+                    }
+                  </style>
+
+                  <div class="overflow-hidden aspect-[4/3] border-white/10 border relative shadow-lg">
+                    <div class="opacity-20 absolute inset-0" style="background-image: linear-gradient(0deg, rgba(255,255,255,0.06) 1px, rgba(0,0,0,0) 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.06) 1px, rgba(0,0,0,0) 1px);
+      background-size: 48px 48px">
+                    </div>
+
+                    <!-- removed rounded-2xl -->
+                    <div class="pointer-events-none absolute inset-0 ring-1 ring-white/10"></div>
+
+                    <div class="absolute inset-8 flex items-center justify-center">
+                      <div
+                        class="border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-md px-8 py-12 shadow-black/30 shadow-lg w-full"
+                        style="animation: scaleIn 0.5s ease-out;">
+
+                        <div class="flex flex-col items-center gap-6">
+                          <div class="relative">
+                            <!-- removed rounded-full -->
+                            <div class="flex animate-pulse w-16 h-16 ring-white/20 ring-2 items-center justify-center"
+                              style="background: radial-gradient(60% 60% at 50% 50%, rgba(139,92,246,.5), rgba(99,102,241,.5))">
+
+                              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="text-white" style="animation: spin 2s linear infinite;">
+                                <path d="M12 2v4" class=""></path>
+                                <path d="m16.2 7.8 2.9-2.9"></path>
+                                <path d="M18 12h4"></path>
+                                <path d="m16.2 16.2 2.9 2.9"></path>
+                                <path d="M12 18v4"></path>
+                                <path d="m4.9 19.1 2.9-2.9"></path>
+                                <path d="M2 12h4"></path>
+                                <path d="m4.9 4.9 2.9 2.9"></path>
+                              </svg>
+                            </div>
+                          </div>
+
+                          <div class="text-center">
+                            <p class="text-white/90 text-lg font-medium">Capturing Spans...</p>
+                            <p class="text-slate-300 text-sm mt-2" style="">Processing live trace data</p>
+                          </div>
+
+                          <!-- removed rounded-full -->
+                          <div class="w-full bg-white/10 h-2 overflow-hidden">
+                            <div class="bg-gradient-to-br from-amber-400 to-amber-600 h-full"
+                              style="width: 65%; animation: 2s ease-out 0s 1 normal none running progressGrow"></div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- removed rounded-2xl -->
+                    <div class="pointer-events-none absolute -inset-1 opacity-60 blur-xl"
+                      style="background: radial-gradient(60% 60% at 50% 50%, rgba(139,92,246,.22), rgba(217,70,239,0) 70%);">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 Card -->
+          <div class="sticky top-40">
+            <div
+              class="shadow-black/30 sm:pd2e32]/95 bg-zinc-950 border-white/10 border pt-4 pr-4 pb-4 pl-4 shadow-2xl backdrop-blur-sm">
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+                <div class="lg:col-span-2 flex items-center justify-center order-1 lg:order-1">
+                  <span
+                    class="text-[120px] sm:text-[180px] leading-none font-semibold tracking-tight text-white/5 select-none">3</span>
+                </div>
+                <div class="lg:col-span-5 order-2 lg:order-2">
+                  <h3 class="text-xl sm:text-2xl lg:text-3xl font-semibold text-white tracking-tight">Alert &amp;
+                    Respond</h3>
+                  <p class="text-sm sm:text-base lg:text-lg text-slate-300 mt-3 sm:mt-4" style="">View traces and
+                    metrics on dashboards, or route alerts straight to the tools your team
+                    already uses. One-click integrations make response seamless.
+                  </p>
+                  <div class="mt-4 sm:mt-6 flex flex-col gap-3 sm:gap-4">
+                    <div
+                      class="inline-flex text-xs sm:text-sm text-slate-200 w-full border-white/10 border rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm gap-2 sm:gap-3 items-center"
+                      style="box-shadow: rgba(0, 0, 0, 0.25) 0px -12px 24px inset, rgba(255, 255, 255, 0.04) 0px 1px 0px inset;">
+                      <span
+                        class="inline-flex items-center justify-center shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-xl ring-white/10 ring-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="h-4 w-4 sm:h-4.5 sm:w-4.5 text-white/90">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </span>
+                      <span class="font-medium tracking-[-0.01em]">Sub-second alert routing.</span>
+                    </div>
+                    <div
+                      class="inline-flex text-xs sm:text-sm text-slate-200 w-full border-white/10 border rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm gap-2 sm:gap-3 items-center"
+                      style="box-shadow: rgba(0, 0, 0, 0.25) 0px -12px 24px inset, rgba(255, 255, 255, 0.04) 0px 1px 0px inset;">
+                      <span
+                        class="inline-flex items-center justify-center shrink-0 w-8 h-8 sm:w-10 sm:h-10 ring-white/10 ring-1 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="h-4 w-4 sm:h-4.5 sm:w-4.5 text-white/90">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" x2="12" y1="15" y2="3"></line>
+                        </svg>
+                      </span>
+                      <span class="font-medium tracking-[-0.01em]">Integrates with JIRA, Slack etc.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="lg:col-span-5 relative order-3 lg:order-3">
+                  <style class="">
+                    @keyframes slideUp {
+                      from {
+                        transform: 0;
+                      }
+
+                      to {
+                        transform: translateY(0);
+                        opacity: 1;
+                      }
+                    }
+
+                    @keyframes shimmer {
+                      0% {
+                        opacity: 0.6;
+                      }
+
+                      50% {
+                        opacity: 1;
+                      }
+
+                      100% {
+                        opacity: 0.6;
+                      }
+                    }
+
+                    @keyframes fadeIn {
+                      from {
+                        opacity: 0;
+                      }
+
+                      to {
+                        opacity: 1;
+                      }
+                    }
+                  </style>
+                  <div class="overflow-hidden aspect-[4/3] border-white/10 border relative shadow-lg">
+
+                    <div class="opacity-20 absolute top-0 right-0 bottom-0 left-0" style="background-image: linear-gradient(0deg, rgba(255,255,255,0.06) 1px, rgba(0,0,0,0) 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, rgba(0,0,0,0) 1px);
+    background-size: 48px 48px">
+                    </div>
+
+                    <!-- removed rounded-2xl -->
+                    <div class="pointer-events-none absolute inset-0 ring-1 ring-white/10"></div>
+
+                    <div class="absolute inset-4 sm:inset-8">
+                      <div
+                        class="border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-md p-3 sm:p-6 shadow-black/30 shadow-lg h-full flex flex-col"
+                        style="animation: slideUp 0.6s ease-out;">
+
+                        <div class="flex items-center justify-between mb-3 sm:mb-4"
+                          style="animation: fadeIn 0.5s ease-out 0.2s both;">
+                          <span class="text-white/90 font-medium text-xs sm:text-sm">Service Alert</span>
+
+                          <!-- removed rounded-full -->
+                          <div
+                            class="inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 border bg-orange-500/20 border-orange-500/30"
+                            style="animation: 0.5s ease-out 0.4s 1 normal both running fadeIn;">
+
+                            <!-- removed rounded-full -->
+                            <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-400"
+                              style="animation: 2s ease-in-out 0s infinite normal none running pulse;"></div>
+
+                            <span class="text-[10px] sm:text-xs text-orange-300" style="">Actionable</span>
+                          </div>
+                        </div>
+
+                        <!-- removed rounded-xl -->
+                        <div class="flex-1 bg-black/20 p-2.5 sm:p-4 mb-3 sm:mb-4 overflow-hidden"
+                          style="animation: fadeIn 0.5s ease-out 0.3s both;">
+
+                          <div class="space-y-1.5 sm:space-y-2">
+
+                            <!-- removed rounded -->
+                            <div class="h-2 sm:h-3 bg-white/20 w-full"
+                              style="animation: shimmer 2s ease-in-out infinite;"></div>
+
+                            <div class="h-2 sm:h-3 bg-white/20 w-5/6"
+                              style="animation: shimmer 2s ease-in-out infinite 0.2s;"></div>
+
+                            <p class="text-xs text-white/80 leading-relaxed">
+                              Elevated 5xx error rate detected on checkout-service. Routed to the on-call engineer.
+                            </p>
+
+                            <div class="h-2 sm:h-3 bg-white/20 w-full"
+                              style="animation: shimmer 2s ease-in-out infinite 0.6s;"></div>
+
+                            <div class="h-2 sm:h-3 bg-white/20 w-3/4"
+                              style="animation: shimmer 2s ease-in-out infinite 0.8s;"></div>
+                          </div>
+
+                        </div>
+
+                        <div class="flex gap-1.5 sm:gap-2" style="animation: slideUp 0.5s ease-out 0.5s both;">
+
+                          <!-- removed rounded-xl -->
+                          <button
+                            class="flex-1 inline-flex gap-1.5 sm:gap-2 sm:px-4 sm:py-2 sm:text-sm transition-all hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 text-xs font-medium text-white bg-gradient-to-br from-orange-400 to-orange-600 px-2.5 py-1.5 gap-x-1.5 gap-y-1.5 items-center justify-center">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                              stroke-linejoin="round" class="h-3 w-3 sm:h-4 sm:w-4">
+                              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                            </svg>
+                            Copy
+                          </button>
+
+                          <!-- removed rounded-xl -->
+                          <button
+                            class="flex-1 inline-flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-white/10 text-white text-xs sm:text-sm font-medium border border-white/10 transition-all hover:bg-white/15 hover:scale-105">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                              stroke-linejoin="round" class="h-3 w-3 sm:h-4 sm:w-4">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="17 8 12 3 7 8"></polyline>
+                              <line x1="12" x2="12" y1="3" y2="15"></line>
+                            </svg>
+                            Share
+                          </button>
+
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <!-- removed rounded-2xl -->
+                    <div class="pointer-events-none absolute -inset-1 opacity-60 blur-xl"
+                      style="background: radial-gradient(60% 60% at 30% 80%, rgba(34,197,94,.18), rgba(16,185,129,0) 70%);">
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer note -->
+  <footer class="pb-10">
+    <div class="sm:px-6 lg:px-8 max-w-7xl mr-auto ml-auto pr-4 pl-4">
+      <!-- CTA -->
+      <div
+        class="overflow-hidden sm:p-10 sm:mb-10 bg-white/5 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/0bcb241d-7f62-4899-8da0-434927914200_1600w.webp)] bg-cover bg-center mb-10 px-6 py-6 relative backdrop-blur-sm rounded-none"
+        style="position: relative; --border-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 0px">
+        <div class="pointer-events-none absolute inset-0 opacity-70"
+          style="background: radial-gradient(120% 80% at 10% 10%, rgba(99,102,241,0.25) 0%, rgba(99,102,241,0.08) 35%, rgba(217,70,239,0.12) 60%, rgba(10,11,16,0) 85%);">
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-6 sm:gap-10 relative">
+          <div class="">
+            <h3 class="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white">Stop Guessing. <br>
+              Start Observing.</h3>
+          </div>
+          <div class="flex flex-col items-start md:items-end gap-4">
+            <p class="text-sm sm:text-base text-white/80 max-w-md md:text-right">© 2026 KloudMate. All rights reserved.
+            </p>
+            <a href="https://app.kloudmate.com/signup"
+              class="inline-flex items-center gap-2 shadow-orange-500/30 text-sm font-medium text-white bg-gradient-to-br from-orange-400 to-orange-600 px-5 py-2.5 shadow-lg">
+              Get Started for Free
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                data-lucide="arrow-right" class="lucide lucide-arrow-right h-4.5 w-4.5">
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+
+      <!-- Detailed footer -->
+      <div
+        class="sm:p-10 bg-gradient-to-br from-black/10 to-black/0 border-white/10 border pt-6 pr-6 pb-6 pl-6 backdrop-blur-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Pages -->
+          <div class="">
+            <h5 class="text-white text-lg font-semibold tracking-tight mb-3">Pages</h5>
+            <ul class="space-y-2 text-sm text-white/80">
+              <li><a href="https://kloudmate.com/" class="hover:text-white/90">Home</a></li>
+              <li><a href="https://kloudmate.com/about" class="hover:text-white/90">About us</a></li>
+              <li><a href="https://blog.kloudmate.com/" class="hover:text-white/90">Blog</a></li>
+              <li class=""><a href="#features" class="hover:text-white/90">Features</a></li>
+            </ul>
+          </div>
+
+          <!-- Resources -->
+          <div class="">
+            <h5 class="text-white text-lg font-semibold tracking-tight mb-3">Resources</h5>
+            <ul class="space-y-2 text-sm text-white/80">
+              <li><a href="https://kloudmate.canny.io/changelog" class="group inline-flex items-center gap-1 hover:text-white/90">Changelog <svg
+                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    data-lucide="arrow-up-right"
+                    class="lucide lucide-arrow-up-right h-3.5 w-3.5 opacity-70 group-hover:opacity-100">
+                    <path d="M7 7h10v10"></path>
+                    <path d="M7 17 17 7"></path>
+                  </svg></a></li>
+              <li class=""><a href="https://kloudmate.com/contact" class="group inline-flex items-center gap-1 hover:text-white/90">Contact us <svg
+                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    data-lucide="arrow-up-right"
+                    class="lucide lucide-arrow-up-right h-3.5 w-3.5 opacity-70 group-hover:opacity-100">
+                    <path d="M7 7h10v10"></path>
+                    <path d="M7 17 17 7"></path>
+                  </svg></a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Social + legal -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="flex flex-wrap items-center gap-3 text-sm">
+            <a href="#" aria-label="LinkedIn"
+              class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                data-lucide="linkedin" class="lucide lucide-linkedin h-4 w-4">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect width="4" height="12" x="2" y="9"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+              </svg>
+              LinkedIn
+            </a>
+          </div>
+          <div class="flex items-center justify-start md:justify-end gap-4 text-xs text-white/60">
+            <a href="https://kloudmate.com/privacy-policy" class="hover:text-white/80">Privacy</a>
+            <a href="https://kloudmate.com/terms-of-service" class="hover:text-white/80">Terms</a>
+            <a href="#" class="hover:text-white/80">Status</a>
+          </div>
+        </div>
+
+        <div class="h-px bg-white/10 my-6"></div>
+
+        <!-- Bottom bar -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/60">
+          <p>© 2026 KloudMate. All rights reserved.</p>
+          <p class="text-white/50">Made with 🧡 by the KloudMate Team</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- lucide for JS-driven icons -->
+  <script src="https://unpkg.com/lucide@latest" class=""></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+    });
+  </script>
+
+  <script>document.addEventListener('DOMContentLoaded', () => { const observer = new IntersectionObserver((entries) => { entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.style.animation = 'fadeSlideBlurIn 1s cubic-bezier(0.16, 1, 0.3, 1) both'; entry.target.style.animationDelay = entry.target.dataset.delay || '0s'; observer.unobserve(entry.target); } }); }, { threshold: 0.1 }); document.querySelectorAll('.scroll-animate').forEach((el, i) => { observer.observe(el); }); });</script>
+</body>
+
+</html>

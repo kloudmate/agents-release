@@ -1,0 +1,58 @@
+---
+title: Upgrade Your KloudMate Agent
+description: Move from Agent 1.x to 2.x for eBPF tracing, service discovery, managed configuration, and Docker awareness.
+sidebar: false
+tocEmbed: https://www.linkedin.com/embed/feed/update/urn:li:share:7501175581326151684?collapsed=1
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+Upgrade your KloudMate Agent to version 2.x.
+
+<Callout title="Still on Agent 1.x?" type="warn">
+  If some of your hosts are still running 1.x, it will continue to send host metrics, but it gets no new features or fixes.
+</Callout>
+
+## Upgrade to Agent 2.x
+
+<Cards>
+  <Card title="Zero-code tracing" description="eBPF RED metrics and spans from the kernel. No SDK, no code change, no restart." />
+  <Card title="Service discovery" description="Apps and containers show up automatically. Turn tracing on per service from the UI." />
+  <Card title="Managed configuration" description="Collector config syncs from the console. No hand-edited YAML per host." />
+  <Card title="Docker awareness" description="Container metrics and logs on Linux are collected automatically when Docker is present." />
+</Cards>
+
+## Follow the steps below to upgrade
+
+<Steps>
+  <Step>
+  ### Grab the install command
+
+  Head to **Settings → Agents** in the console and copy the Agent 2.x install command for your host.
+
+  About two minutes per host, no reboot required.
+  </Step>
+
+  <Step>
+  ### Enable APM, databases, and logs
+
+  The KloudMate Agent V2 was rebuilt to remove the manual setup work entirely. It discovers your services, collects host metrics and logs, and runs eBPF monitoring automatically the moment you install it — with zero code changes. Of course, there are also SDKs for deeper granularity and insights.
+
+  APM, database, and log monitoring are now wizards and toggles, instead of hand-written config files.
+
+  <img
+    src="/images/apm.png"
+    alt="Configure page in the KloudMate console showing per-service APM instrumentation toggles for Off, eBPF, and SDK"
+    width={1103}
+    height={821}
+    className="mx-auto"
+    style={{ maxWidth: '80%' }}
+  />
+  </Step>
+
+  <Step>
+  ### That's all
+
+  You'll now get APM, traces, and logs — you can even turn on process monitoring too.
+  </Step>
+</Steps>

@@ -3,6 +3,7 @@ import { Provider } from '@/components/provider';
 import './global.css';
 import { Banner } from '@/components/banner';
 import { Metadata, Viewport } from 'next';
+import Link from 'next/link';
 
 const font = Source_Sans_3({
   subsets: ['latin'],
@@ -75,7 +76,7 @@ export default async function Layout({
   return (
     <html lang="en" className={font.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
-        <Banner id='banner' changeLayout={true}
+        <Banner id='agent-v2-banner' changeLayout={true}
           variant="rainbow"
           rainbowColors={[
             'rgba(255,100,0, 0.5)',
@@ -87,7 +88,9 @@ export default async function Layout({
             'transparent',
           ]}
         >
-          v1.2.0 Launched 🎉 - Introduces eBPF based Monitoring | APM on Host Agents | DAM
+          <Link href="/docs/upgrade-to-v2" className="hover:underline">
+            🚀 Agent v2.0 is here — Zero-Code eBPF Tracing · Auto Service Discovery · Managed Config · Docker-Aware. Upgrade now →
+          </Link>
         </Banner>
         <Provider>{children}</Provider>
       </body>
