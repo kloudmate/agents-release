@@ -4,6 +4,7 @@
 - [Configuration](/docs/configuration): Configure the KloudMate Agent locally or via remote management.
 - [KloudMate Agents](/docs): An OpenTelemetry Collector distribution with automated deployment, remote configuration, eBPF-powered zero-code observability, and auto-instrumentation support.
 - [Troubleshooting](/docs/troubleshooting): Common issues and how to resolve them when using the KloudMate Agent.
+- [Upgrade Your KloudMate Agent](/docs/upgrade-to-v2): Move from Agent 1.x to 2.x for eBPF tracing, service discovery, managed configuration, and Docker awareness.
 - [Overview](/docs/apm): Application Performance Monitoring capabilities within KloudMate Agent.
 - [Manual Instrumentation](/docs/apm/manual-instrumentation): Use OpenTelemetry SDKs directly in your application code for rich, customized tracing and metrics.
 - [Zero Code Instrumentation](/docs/apm/zero-code-instrumentation): Auto-instrument your applications without code changes using OpenTelemetry auto-instrumentation agents.
