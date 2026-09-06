@@ -506,8 +506,6 @@ Three metrics changed name to follow the OpenTelemetry semantic conventions.
 | `rpc.client.duration`        | `rpc.client.call.duration`            |
 | `messaging.publish.duration` | `messaging.client.operation.duration` |
 
-The TCP stat metrics also moved from the `obi.stat.tcp.*` prefix to `kloudmate.stat.tcp.*`, and the host IP attribute from `obi.ip` to `kloudmate.ip`.
-
 Configuration and setup [#configuration-and-setup]
 
 The agent runs as a DaemonSet in a Kubernetes cluster, or as a standalone process on a Linux host.
