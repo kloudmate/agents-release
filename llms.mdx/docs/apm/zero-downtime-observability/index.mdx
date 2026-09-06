@@ -2,81 +2,66 @@
 
 
 
-Prelude [#prelude]
+Getting observability into a running system usually costs a deployment. You add an SDK, or attach an auto-instrumentation agent, and either way that means a code change and a restart. On the systems where restarts are most expensive, that cost is usually what keeps them uninstrumented.
 
-Mission-critical environments managed by forward-thinking Site Reliability Engineering (SRE) teams, Security Operations Centers (SOCs), and tier-1 financial institutions face a fundamental paradox: You need deep observability to maintain stability, but deploying traditional observability agents compromises that stability.
+The eBPF receiver avoids it. eBPF (Extended Berkeley Packet Filter) runs sandboxed programs inside the Linux kernel, so the KloudMate agent observes syscalls and network traffic from below your application rather than from inside it. Nothing links into your process, and nothing restarts.
 
-The KloudMate's eBPF Approach solves this paradox. It provides a drop-in APM observability component that lives in the Linux kernel—observing the behavior of the entire system dynamically without altering user-level applications.
+What you get without touching the application [#what-you-get-without-touching-the-application]
 
-By deploying the KloudMate Agent with the eBPF receiver enabled, you unlock instant, out-of-the-box observability for your entire infrastructure—without requiring code changes, manual configurations, or application restarts.
+RED metrics [#red-metrics]
 
-**A Paradigm Shift**
+Request rate, error rate, and duration for every observed service. The agent parses HTTP/HTTP2, gRPC, MySQL, PostgreSQL, Redis, MongoDB, Kafka, and Elasticsearch, so the metrics carry real operational detail: HTTP status codes, gRPC status flags, and database operations, rather than opaque byte counts.
 
-If your application can run on Linux, it can be fully observed by KloudMate. Enjoy frictionless operations and complete network visibility with absolute Zero Downtime.
+Distributed tracing [#distributed-tracing]
 
-Out-of-the-Box Value [#out-of-the-box-value]
+Incoming requests are correlated with the outgoing calls they cause, so an HTTP handler and the database query it issues land in the same trace. Spans follow OpenTelemetry semantic conventions, which is what lets the service graph build itself.
 
-The eBPF receiver leverages the Extended Berkeley Packet Filter to extract vast amounts of actionable metrics securely. From day one, your SOC and SRE teams receive:
+Service inventory and metadata [#service-inventory-and-metadata]
 
-1. Universal RED Metrics [#1-universal-red-metrics]
+The agent identifies each process's runtime language (`telemetry.sdk.language`) without modifying the binary, and tags traces with host and process IDs plus cloud provider metadata. Under Kubernetes it adds `namespace`, `pod_name`, `deployment`, and `node_name`.
 
-Automatically generates and exports comprehensive Request Rate, Error Rate, and Duration (Latency) metrics across all observed services.
+Network flows [#network-flows]
 
-* **Protocol Agnostic**: Automatically supports HTTP/HTTP2, gRPC, MySQL, PostgreSQL, Redis, MongoDB, Kafka, and Elasticsearch.
-* **Operational Context**: Every metric includes critical operational markers such as exact HTTP status codes, gRPC status flags, and Database query behaviors.
+L3/L4 flow metrics between endpoints: bytes transferred, TCP retransmits, connection state changes, and drops between isolated services. This is the service-to-service communication map, which is usually the first thing you want when an incident crosses a boundary you did not know existed.
 
-2. Auto-Distributed Tracing [#2-auto-distributed-tracing]
+eBPF compared with SDK instrumentation [#ebpf-compared-with-sdk-instrumentation]
 
-* Intelligently links incoming network requests to outgoing dependency calls instantaneously (e.g., an HTTP handler querying a database instance).
-* Generates strictly compliant OpenTelemetry trace spans, producing a seamless Service Graph representing your living architecture.
+|               | eBPF receiver                                            | SDK / auto-instrumentation                           |
+| :------------ | :------------------------------------------------------- | :--------------------------------------------------- |
+| Code changes  | None; deploy the agent to the node                       | An SDK dependency, or an agent attached via env vars |
+| Restarts      | None                                                     | A rolling restart to inject instrumentation          |
+| Setup         | One DaemonSet, or one process per host                   | Per-service configuration and library upgrades       |
+| Languages     | Go, Rust, C++, Python, Java, Node.js, Ruby               | Per-language SDKs; compiled languages are hardest    |
+| Overhead      | Runs in the kernel; no in-process cost                   | In-process, and grows with library coverage          |
+| Coverage gaps | No per-service opt-in; services are picked up by default | Un-instrumented services stay invisible              |
 
-3. Dynamic Service Inventory & Metadata [#3-dynamic-service-inventory--metadata]
+What eBPF cannot do [#what-ebpf-cannot-do]
 
-* Automatically identifies the process language (`km.apm.runtime.language`) of your running applications without touching the binary.
-* Enriches traces with dense Host IDs, Process IDs, and Cloud Provider metadata tags.
-* If running under Kubernetes, it correlates metrics securely with K8s attributes (`namespace`, `pod_name`, `deployment`, `node_name`) dynamically.
+eBPF sees syscalls and network boundaries, not the inside of your application. Two things follow from that.
 
-4. Granular Network Observability [#4-granular-network-observability]
+Business logic stays out of reach. Attributes like `user_id` or `cart_value` live in application memory, never in a syscall, so eBPF has no way to read them.
 
-* Captures L3/L4 network flow metrics transparently—including full bytes transferred, TCP retransmits, state alterations, and packet drops between isolated services.
-* Empowers security teams (SOC) with definitive visibility into service-to-service communication dependencies and anomalous traffic mapping.
+You get boundaries, not stack traces. A request's entry and exit are visible; the execution time of individual functions within it is not.
 
-The KloudMate APM Edge vs. Traditional Telemetry [#the-kloudmate-apm-edge-vs-traditional-telemetry]
+How to deploy it [#how-to-deploy-it]
 
-While traditional OpenTelemetry heavily relies on language-specific SDKs (manual instrumentation) or bloated runtime dependencies (auto-instrumentation) attached to every service, the KloudMate eBPF Receiver is profoundly superior in high-risk environments.
+Start with eBPF. One agent per host covers every service on that host, in any language, including the ones nobody has gotten around to instrumenting. That gets you the service graph and baseline RED metrics without a deployment.
 
-| Feature                  | KM eBPF Receiver                                           | Traditional OpenTelemetry                                     |
-| :----------------------- | :--------------------------------------------------------- | :------------------------------------------------------------ |
-| **Code Changes**         | **None.** Deploy the agent to the node.                    | Requires SDK dependencies or attaching agents.                |
-| **Application Restarts** | **No restarts required.**                                  | Requires rolling restarts to inject instrumentation.          |
-| **Setup Complexity**     | **Low.** Single DaemonSet / VM process per host.           | **High.** Per-service configuration, library updates.         |
-| **Language Support**     | **Universal.** Go, Rust, C++, Python, Java, Node.js, Ruby. | Requires per-language SDKs; compiled languages are difficult. |
-| **Performance Overhead** | **Extremely low.** Runs in kernel space.                   | Higher, especially with rich auto-instrumentation.            |
-| **Missing Services**     | Impossible — the kernel sees every packet.                 | Un-instrumented services remain blind spots.                  |
+Then add SDKs where they earn their keep. For the handful of services that need business logic on the span, a user ID or a transaction state, [manual instrumentation](/docs/apm/manual-instrumentation) is still the only way to get it. KloudMate merges both sources, so an SDK-instrumented service sits in the same traces as its eBPF-observed neighbours.
 
-Deploying APM Strategically [#deploying-apm-strategically]
+Configuration and setup [#configuration-and-setup]
 
-**Start with eBPF:** The eBPF Receiver serves as the ultimate foundational layer for enterprise observability. For massive deployments like tier-1 Banks or multi-tenant SaaS platforms, deploy the KM-Agent to grab immediate Service Graphs, rigorous network insights, and universal APM metrics across every language and stack you run.
-
-**Enrich Where Necessary:** Once eBPF has illuminated the vast majority of your distributed architecture, strategically deploy [Manual Instrumentation](/docs/apm/manual-instrumentation) SDKs into the specific handful of applications requiring bespoke business logic mapping (such as tracing a specific User ID or capturing unique transaction states).
-
-The KloudMate Agent seamlessly merges eBPF kernel intelligence with your applications telemetry data giving your SRE teams a flawless, unified view of reality.
-
-Configuration & Setup [#configuration--setup]
-
-The KloudMate eBPF Agent is a minimal-configuration observability agent designed to run as a DaemonSet within your Kubernetes cluster or as a standalone process on a Linux host. This section details how to configure the agent perfectly for full-stack visibility.
+The agent runs as a DaemonSet in a Kubernetes cluster, or as a standalone process on a Linux host.
 
 Prerequisites [#prerequisites]
 
-* A Linux host with kernel version {'>='} 5.8 (highly recommended for full feature support, though some features work on 4.18+).
-* Root privileges or `CAP_SYS_ADMIN` and `CAP_BPF` capabilities for the agent process.
-* If running in Kubernetes, the Agent requires specific RBAC permissions (Node, Pod, Service, ReplicaSet viewers) to enrich the metrics automatically.
+* A Linux host with kernel {'>='} 5.8 for full feature support. Some features work on 4.18+.
+* Root privileges, or the `CAP_SYS_ADMIN` and `CAP_BPF` capabilities for the agent process.
+* On Kubernetes, RBAC permissions to view Nodes, Pods, Services, and ReplicaSets, which is what the metadata enrichment reads.
 
-Basic Configuration [#basic-configuration]
+Basic configuration [#basic-configuration]
 
-To enable the eBPF Agent's core features—Application RED Metrics, Network Observability, and OpenTelemetry Exporting—you can add following to your receiver's definition.
-
-Here is a standard configuration example that enables the most common telemetry features across the entire host/node automatically, pointing data to a local OTEL Collector or directly to the KloudMate backend.
+This enables the common features across a whole host or node, sending data to a local OpenTelemetry Collector or straight to the KloudMate backend. Add it to your receiver definition.
 
 ```yaml
 # ============================================================================
@@ -125,9 +110,9 @@ attributes:
 # ============================================================================
 ```
 
-Advanced Fine-Tuning [#advanced-fine-tuning]
+Fine-tuning [#fine-tuning]
 
-The agent allows very specific overrides, feature flags, and granular attribute filtering. You can tune caching sizes and limit what exact attributes are exported per signal via the `attributes.select` map.
+Cache sizes matter under load, and `attributes.select` controls exactly which attributes are exported per signal, which is the lever to pull when cardinality gets expensive.
 
 ```yaml
 ebpf:
@@ -158,12 +143,10 @@ attributes:
         - service.name
 ```
 
-Running the Agent with eBPF in Kubernetes [#running-the-agent-with-ebpf-in-kubernetes]
+Running the agent on Kubernetes [#running-the-agent-on-kubernetes]
 
-When installing via the official KloudMate Helm Chart (as outlined in the [Installation Guide](/docs/installation#kubernetes-installation)), the eBPF support is automatically configured with necessary volume mounts and permissions.
+The official KloudMate Helm chart (see the [installation guide](/docs/installation#kubernetes-installation)) configures eBPF support with the volume mounts and permissions it needs, so there are no DaemonSets or mounts to write by hand. Set `kubernetes.enable: true` in the `discovery` block of your `receivers::ebpfreceiver` section and list the namespaces you want monitored.
 
-You do not need to manually create DaemonSets or map volume mounts. Simply ensure that the `discovery` block in your `receivers::ebpfreceiver` section has `kubernetes.enable: true` and that the correct `namespace` lists are provided to begin monitoring traffic immediately.
+Trace context propagation [#trace-context-propagation]
 
-**Trace context propagation**
-
-You need to enable the `application_span` in the `metrics` section of the `receivers::ebpfreceiver` configuration. Also you must ensure that `network::source` is set to `socket_filter`.
+Enable `application_span` under `metrics.features`, and set `network.source` to `socket_filter`.

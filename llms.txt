@@ -8,17 +8,17 @@
 - [Overview](/docs/apm): Application Performance Monitoring capabilities within KloudMate Agent.
 - [Manual Instrumentation](/docs/apm/manual-instrumentation): Use OpenTelemetry SDKs directly in your application code for rich, customized tracing and metrics.
 - [Zero Code Instrumentation](/docs/apm/zero-code-instrumentation): Auto-instrument your applications without code changes using OpenTelemetry auto-instrumentation agents.
-- [Zero-Downtime O11y (eBPF)](/docs/apm/zero-downtime-observability): Observe your entire infrastructure seamlessly with the KloudMate's eBPF powered Agent—No Code Changes. No Restarts. Immediate Value.
+- [Zero-Downtime O11y (eBPF)](/docs/apm/zero-downtime-observability): Instrument Linux services with the KloudMate eBPF agent: no code changes, no application restarts.
 - [Connectors](/docs/components/connectors): OpenTelemetry Collector connectors bundled with the KloudMate Agent.
 - [Exporters](/docs/components/exporters): OpenTelemetry Collector exporters bundled with the KloudMate Agent.
 - [Extensions](/docs/components/extensions): OpenTelemetry Collector extensions bundled with the KloudMate Agent.
 - [Components Overview](/docs/components): OpenTelemetry Collector components bundled with the KloudMate Agent.
 - [Processors](/docs/components/processors): OpenTelemetry Collector processors bundled with the KloudMate Agent.
 - [Receivers](/docs/components/receivers): OpenTelemetry Collector receivers bundled with the KloudMate Agent.
+- [AWS ASG Deployment](/docs/installation/aws-asg): Deploy kmagent across an Auto Scaling Group with zero manual per-instance work.
+- [Infrastructure as a Code (IaaC) Installation](/docs/installation/iaac): Deploy the KloudMate agent across any cloud provider or on-premises infrastructure using Infrastructure as a Code (IaaC) and automation tools.
+- [Installation](/docs/installation): Install the KloudMate Agent on Linux, Docker, Kubernetes, or Windows.
 - [Database Access Monitoring (DAM)](/docs/databases/ebpf): eBPF-powered database monitoring without any hassle.
 - [Databases Monitoring](/docs/databases): Monitor database queries and performance seamlessly.
 - [OpenTelemetry Database Monitoring](/docs/databases/otel): Monitor databases using OpenTelemetry SDK instrumentation for rich query tracing.
 - [Direct Database Monitoring](/docs/databases/sql-setup): Set up SQL-based monitoring with a dedicated monitoring user, helper procedures, and deep query analytics.
-- [AWS ASG Deployment](/docs/installation/aws-asg): Deploy kmagent across an Auto Scaling Group with zero manual per-instance work.
-- [Infrastructure as a Code (IaaC) Installation](/docs/installation/iaac): Deploy the KloudMate agent across any cloud provider or on-premises infrastructure using Infrastructure as a Code (IaaC) and automation tools.
-- [Installation](/docs/installation): Install the KloudMate Agent on Linux, Docker, Kubernetes, or Windows.
