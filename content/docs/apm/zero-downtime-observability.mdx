@@ -50,6 +50,92 @@ Start with eBPF. One agent per host covers every service on that host, in any la
 
 Then add SDKs where they earn their keep. For the handful of services that need business logic on the span, a user ID or a transaction state, [manual instrumentation](/docs/apm/manual-instrumentation) is still the only way to get it. KloudMate merges both sources, so an SDK-instrumented service sits in the same traces as its eBPF-observed neighbours.
 
+## Metrics reference
+
+Nothing is exported unless the feature that owns it is listed under `metrics.features`. The names below are the Prometheus forms; over OTLP the same metric uses dots instead of underscores and drops the unit suffix, so `http_server_request_duration_seconds` is `http.server.request.duration`.
+
+### Application RED: `application`
+
+| Metric | What it measures |
+| :-- | :-- |
+| `http_server_request_duration_seconds` | Inbound HTTP request duration |
+| `http_client_request_duration_seconds` | Outbound HTTP request duration |
+| `http_server_request_body_size_bytes` | Inbound request body size |
+| `http_server_response_body_size_bytes` | Inbound response body size |
+| `http_client_request_body_size_bytes` | Outbound request body size |
+| `http_client_response_body_size_bytes` | Outbound response body size |
+| `rpc_server_call_duration_seconds` | Inbound gRPC call duration |
+| `rpc_client_call_duration_seconds` | Outbound gRPC call duration |
+| `db_client_operation_duration_seconds` | Database calls made by the service |
+| `db_server_operation_duration_seconds` | Database calls served by the process, when the database itself is instrumented |
+| `messaging_client_operation_duration_seconds` | Publishing to a message broker |
+| `messaging_process_duration_seconds` | Consuming from a message broker |
+| `dns_lookup_duration_seconds` | DNS resolution latency |
+| `gen_ai_client_operation_duration_seconds` | LLM request duration |
+| `gen_ai_client_token_usage` | Input and output tokens per LLM request |
+| `gpu_cuda_kernel_launch_calls_total` | CUDA kernel launches |
+| `gpu_cuda_graph_launch_calls_total` | CUDA graph launches |
+| `gpu_cuda_kernel_grid_size` | Grid size per kernel launch |
+| `gpu_cuda_kernel_block_size` | Block size per kernel launch |
+| `gpu_cuda_memory_allocations_bytes_total` | Device memory allocated |
+| `gpu_cuda_memory_copies_bytes` | Host/device memory copy sizes |
+
+Add `application_host` to get the same RED metrics aggregated per host rather than per service, which is the view you want when asking whether a node is saturated rather than whether a service is slow.
+
+### Span and dependency metrics
+
+| Feature | Metrics |
+| :-- | :-- |
+| `application_span_otel` | `traces_span_metrics_calls_total`, `traces_span_metrics_duration_seconds` |
+| `application_service_graph` | `traces_service_graph_request_total`, `traces_service_graph_request_failed_total`, `traces_service_graph_request_client_seconds`, `traces_service_graph_request_server_seconds` |
+
+The service graph metrics are what the topology view is drawn from. `application_span` and `application_span_sizes` still work and emit the older `traces_spanmetrics_*` names, but both are deprecated; `application_span_otel` matches the OpenTelemetry Collector's spanmetrics connector, so the same dashboards work against either source.
+
+### Runtime metrics: `application_runtime`
+
+Per-process runtime internals, read without an SDK or an agent inside the process. Off by default.
+
+| Runtime | Metrics |
+| :-- | :-- |
+| Go | `go_memory_used_bytes`, `go_memory_limit_bytes`, `go_memory_allocated_bytes_total`, `go_memory_allocations_total`, `go_memory_gc_goal_bytes`, `go_memory_gc_cycles_total`, `go_memory_gc_pause_duration_seconds`, `go_cpu_time_seconds_total`, `go_schedule_duration_seconds`, `go_goroutine_count`, `go_processor_limit`, `go_config_gogc_percent` |
+| JVM | `jvm_memory_used_bytes`, `jvm_memory_committed_bytes`, `jvm_memory_limit_bytes`, `jvm_memory_used_after_last_gc_bytes`, `jvm_class_loaded_total`, `jvm_class_unloaded_total`, `jvm_class_count`, `jvm_thread_count`, `jvm_cpu_time_seconds_total`, `jvm_cpu_count`, `jvm_cpu_recent_utilization_ratio` |
+| Node.js | `v8js_memory_heap_used_bytes`, `v8js_memory_heap_limit_bytes`, `v8js_memory_heap_space_available_size_bytes`, `v8js_memory_heap_space_physical_size_bytes`, `v8js_gc_duration_seconds`, and `nodejs_eventloop_*` delay and utilization |
+| Python | `cpython_gc_collections`, `cpython_gc_collected_objects`, `cpython_gc_uncollectable_objects` |
+
+### Network flows
+
+| Feature | Metric | What it measures |
+| :-- | :-- | :-- |
+| `network` | `kloudmate_network_flow_bytes_total` | Bytes per flow between two endpoints |
+| `network_flow_packets` | `kloudmate_network_flow_packets_total` | Packets per flow |
+| `network_inter_zone` | `kloudmate_network_inter_zone_bytes_total` | Bytes crossing a configured zone boundary |
+
+### TCP stats
+
+| Feature | Metric | What it measures |
+| :-- | :-- | :-- |
+| `stats_tcp_rtt` | `kloudmate_stat_tcp_rtt_seconds` | Round-trip time per connection |
+| `stats_tcp_failed_connections` | `kloudmate_stat_tcp_failed_connections_total` | Failed connects, labelled by reason |
+| `stats_tcp_retransmits` | `kloudmate_stat_tcp_retransmits_total` | Retransmitted segments |
+| `stats_tcp_io` | `kloudmate_stat_tcp_io_bytes_total` | Bytes sent and received per connection |
+
+`stats` turns on all four. Be deliberate about `stats_tcp_io`: it fires on every `tcp_sendmsg` and `tcp_cleanup_rbuf`, where the other three fire only on close, failure, or retransmit. If event volume is a concern, enable the other three and opt into `stats_tcp_io` separately.
+
+### Migrating from an earlier agent
+
+Three metrics changed name to follow the OpenTelemetry semantic conventions, and three had an incorrect `_total` suffix removed. They are histograms, and always were; the suffix said counter.
+
+| Before | Now |
+| :-- | :-- |
+| `rpc_server_duration_seconds` | `rpc_server_call_duration_seconds` |
+| `rpc_client_duration_seconds` | `rpc_client_call_duration_seconds` |
+| `messaging_publish_duration_seconds` | `messaging_client_operation_duration_seconds` |
+| `gpu_cuda_kernel_grid_size_total` | `gpu_cuda_kernel_grid_size` |
+| `gpu_cuda_kernel_block_size_total` | `gpu_cuda_kernel_block_size` |
+| `gpu_cuda_memory_copies_bytes_total` | `gpu_cuda_memory_copies_bytes` |
+
+The TCP stat metrics also moved from the `obi_stat_tcp_*` prefix to `kloudmate_stat_tcp_*`, and the host IP attribute from `obi_ip` to `kloudmate_ip`.
+
 ## Configuration and setup
 
 The agent runs as a DaemonSet in a Kubernetes cluster, or as a standalone process on a Linux host.
@@ -73,9 +159,8 @@ metrics:
     - application              # Exports standard RED (Request rate, Error rate, Duration) metrics for HTTP, gRPC, DB, and Messaging requests at the service level.
     - application_host         # Exports RED metrics aggregated at the host/node level, providing a node-centric view of application performance.
     - network                  # Exports granular L3/L4 network flow metrics (TCP/UDP bytes, drops, retransmits) between connection endpoints.
-    - application_process      # Exports RED metrics aggregated down to the specific Process ID (PID) instance level for deeper isolation.
     - network_inter_zone       # Aggregates network flow metrics specifically based on traffic crossing defined geographic or logical zones (CIDRs).
-    - application_span         # Exports OpenTelemetry span-based metrics (Span metrics) derived directly from the generated trace spans.
+    - application_span_otel    # Exports OpenTelemetry span metrics (traces_span_metrics_*) derived from the generated spans.
     - application_service_graph # Exports specifically formatted dependency metrics (service_graph_request_total, etc.) used to build visual topological service maps.
 
 # ============================================================================
