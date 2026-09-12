@@ -6,6 +6,48 @@ entries:
       charts.openshift.io/provider: KloudMate Technologies, Inc.
       charts.openshift.io/support: support@kloudmate.com
     apiVersion: v2
+    appVersion: 2.2.0
+    created: "2026-09-12T12:29:11.714172642Z"
+    dependencies:
+    - condition: cert-manager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: v1.18.2
+    - condition: opentelemetry-operator.enabled
+      name: opentelemetry-operator
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.120.0
+    description: A Helm chart for Kloumate's Kubernetes flavored Agent
+    digest: 576542765a5a792921071340d74722a5cbc0509fa0a8083f63875dfd110b32b7
+    home: https://www.kloudmate.com
+    icon: https://avatars.githubusercontent.com/u/103623326?s=48&v=4
+    keywords:
+    - kloudmate
+    - observability
+    - opentelemetry
+    - agent
+    - monitoring
+    - tracing
+    - logs
+    - metrics
+    - apm
+    kubeVersion: '>=1.24.0-0'
+    maintainers:
+    - email: support@kloudmate.com
+      name: Amitava Kumar Saha
+      url: https://www.kloudmate.com/support
+    name: km-kube-agent
+    sources:
+    - https://github.com/kloudmate/km-agent
+    type: application
+    urls:
+    - https://github.com/kloudmate/agents-release/releases/download/v2.2.0/km-kube-agent-2.2.0.tgz
+    version: 2.2.0
+  - annotations:
+      charts.openshift.io/name: KM Agent
+      charts.openshift.io/provider: KloudMate Technologies, Inc.
+      charts.openshift.io/support: support@kloudmate.com
+    apiVersion: v2
     appVersion: 2.1.2
     created: "2026-09-01T14:10:12.029372193Z"
     dependencies:
@@ -567,7 +609,7 @@ entries:
     version: 1.1.5
   - apiVersion: v2
     appVersion: 1.1.4
-    created: "2026-09-01T14:10:12.019608559Z"
+    created: "2026-09-12T12:29:11.70623967Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -599,11 +641,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.1.2/km-kube-agent-1.1.4.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.2.0/km-kube-agent-1.1.4.tgz
     version: 1.1.4
   - apiVersion: v2
     appVersion: 1.1.3
-    created: "2026-09-01T14:10:12.010267311Z"
+    created: "2026-09-12T12:29:11.698981854Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -635,11 +677,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.1.2/km-kube-agent-1.1.3.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.2.0/km-kube-agent-1.1.3.tgz
     version: 1.1.3
   - apiVersion: v2
     appVersion: 1.1.2
-    created: "2026-09-01T14:10:12.001250977Z"
+    created: "2026-09-12T12:29:11.691458436Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -671,11 +713,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.1.2/km-kube-agent-1.1.2.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.2.0/km-kube-agent-1.1.2.tgz
     version: 1.1.2
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2026-09-01T14:10:11.99245614Z"
+    created: "2026-09-12T12:29:11.683400051Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -707,11 +749,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.1.2/km-kube-agent-1.1.1.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.2.0/km-kube-agent-1.1.1.tgz
     version: 1.1.1
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2026-09-01T14:10:11.982221419Z"
+    created: "2026-09-12T12:29:11.674843278Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -743,6 +785,6 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/kloudmate/agents-release/releases/download/v2.1.2/km-kube-agent-1.1.0.tgz
+    - https://github.com/kloudmate/agents-release/releases/download/v2.2.0/km-kube-agent-1.1.0.tgz
     version: 1.1.0
-generated: "2026-09-01T14:10:11.972744823Z"
+generated: "2026-09-12T12:29:11.666246241Z"
